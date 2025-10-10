@@ -3,11 +3,17 @@ from models import db, Users, Hospitals, Beds, Bookings, Vaccines
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import date
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # this will load environment variables from .env
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://hospital_user:StrongPasswordHere@localhost/beds_and_vaccine_bookings'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'devkey'
+
 
 db.init_app(app)
 with app.app_context():
