@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Vaccine</title>
+</head>
+<body>
+    <h1>Select a Vaccine</h1>
+    <form method="POST">
+        <label for="vaccine_name">Choose a vaccine:</label>
+        <select name="vaccine_name" id="vaccine_name" required>
+            <!-- Options dynamically from database -->
+            {% for vaccine in vaccines %}
+                <option value="{{ vaccine }}">{{ vaccine }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <button type="submit">Next</button>
+    </form>
+</body>
+</html>

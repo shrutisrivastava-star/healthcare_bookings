@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>My Bookings</h2>
+
+{% if bookings %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <tr>
+        <th>Booking ID</th>
+        <th>Type</th>
+        <th>Hospital</th>
+        <th>Status</th>
+        <th>Appointment Date</th>
+    </tr>
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking.Booking_ID }}</td>
+        <td>{{ booking.Type }}</td>
+        <td>{{ booking.Hospital_Name or 'N/A' }}</td>
+        <td>{{ booking.Status }}</td>
+        <td>{{ booking.Appointment_date }}</td>
+
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>You have no bookings yet.</p>
+{% endif %}
+
+{% endblock %}

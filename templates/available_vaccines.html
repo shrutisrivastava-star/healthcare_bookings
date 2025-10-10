@@ -1,0 +1,15 @@
+<h2>Hospitals with {{ vaccine_name }}</h2>
+{% if hospitals %}
+    <ul>
+    {% for hospital, slot in hospitals %}
+        <li>
+            {{ hospital.Name }} -
+           <a href="{{ url_for('hospital_vaccine_slots', hospital_id=hospital.Hospital_ID) }}">View Slots</a>
+
+
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No hospitals available for this vaccine.</p>
+{% endif %}

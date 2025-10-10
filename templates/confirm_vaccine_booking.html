@@ -1,0 +1,7 @@
+<h2>Confirm Vaccine Booking</h2>
+<p>Patient: {{ user.Full_Name }}</p>
+<p>Vaccine: {{ slot.Vaccine_Name }}</p>
+<p>Date: {{ slot.Slot_Date }} | Time: {{ slot.Slot_Time }}</p>
+<form method="POST">
+    <button type="submit">Confirm & Pay</button>
+</form>

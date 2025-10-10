@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Available Hospitals</title>
+</head>
+<body>
+    <h2>Hospitals with {{ bed_type }} beds available</h2>
+    {% if hospitals %}
+        <ul>
+        {% for hospital in hospitals %}
+            <li>
+                <strong>{{ hospital['Name'] }}</strong>, {{ hospital['City'] }}<br>
+                <a href="{{ url_for('hospital_beds_page', hospital_id=hospital['Hospital_ID'], bed_type=bed_type) }}">View Beds</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hospitals available for {{ bed_type }} beds.</p>
+    {% endif %}
+</body>
+</html>

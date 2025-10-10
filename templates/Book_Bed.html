@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Bed</title>
+</head>
+<body>
+    <h2>Select Bed Type</h2>
+    <form method="POST" action="{{ url_for('book_bed') }}">
+        <select name="bed_type" required>
+            <option value="">--Select--</option>
+            <option value="ICU">ICU</option>
+            <option value="General">General</option>
+            <option value="Private">Private</option>
+        </select>
+        <button type="submit">Next</button>
+    </form>
+</body>
+</html>

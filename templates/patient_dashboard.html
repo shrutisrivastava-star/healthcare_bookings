@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f2f2f2;
+        }
+        h1 {
+            color: #333;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ user.Full_Name }}!</h1>
+
+    <div>
+        <a href="{{ url_for('book_bed') }}">Book Bed</a>
+
+
+
+    </div>
+
+    <div>
+        <a href="{{ url_for('book_vaccine') }}" class="button">Book Vaccine 💉</a>
+
+    </div>
+
+    <div>
+       <a href="{{ url_for('my_bookings') }}" class="button">My Bookings 📋</a>
+
+    </div>
+
+    <div>
+        <a href="{{ url_for('logout') }}" class="button" style="background-color: #dc3545;">Logout 🚪</a>
+    </div>
+</body>
+</html>

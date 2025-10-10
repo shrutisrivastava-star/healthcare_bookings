@@ -1,0 +1,13 @@
+<h2>Available Slots at {{ hospital.Name }}</h2>
+{% if slots %}
+    <ul>
+    {% for slot in slots %}
+        <li>
+            {{ slot.Vaccine_Name }} | Date: {{ slot.Slot_Date }} | Time: {{ slot.Slot_Time }} | Available: {{ slot.Available }}
+            <a href="{{ url_for('confirm_vaccine_booking', slot_id=slot.Slot_ID) }}">Book</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No slots available.</p>
+{% endif %}

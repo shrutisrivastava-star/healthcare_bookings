@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Beds in {{ hospital.Name }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; }
+        a.button { 
+            padding: 5px 10px; 
+            background-color: #4CAF50; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px; 
+        }
+        a.button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+
+<h2>Available {{ bed_type }} Beds in {{ hospital.Name }}</h2>
+
+{% if beds %}
+    <ul>
+    {% for bed in beds %}
+        <li>
+            <strong>Bed ID:</strong> {{ bed.Bed_ID }} | 
+            <strong>Type:</strong> {{ bed.Bed_Type }} | 
+            <strong>Status:</strong> {{ bed.Status }}
+            <br>
+            <a href="{{ url_for('confirm_bed_booking', bed_id=bed.Bed_ID) }}" class="button">Book Now</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No available beds of this type.</p>
+{% endif %}
+
+<a href="{{ url_for('book_bed_page') }}">Back to Bed Selection</a>
+
+</body>
+</html>

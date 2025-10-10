@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Bed Booking</title>
+</head>
+<body>
+    <h2>Confirm Bed Booking</h2>
+    <p><strong>Patient Name:</strong> {{ user.Full_Name }}</p>
+    <p><strong>Hospital:</strong> {{ hospital.Name }}</p>
+    <p><strong>Bed Type:</strong> {{ bed.Bed_Type }}</p>
+    <p><strong>Price:</strong> ₹1000 <!-- Optional: you can calculate dynamically --></p>
+
+    <form method="POST">
+        <button type="submit">Confirm Booking</button>
+    </form>
+
+    <a href="{{ url_for('hospital_beds_page', hospital_id=hospital.Hospital_ID, bed_type=bed.Bed_Type) }}">Back</a>
+</body>
+</html>
