@@ -1,0 +1,23 @@
+<div class="container mt-5">
+  <h3 class="text-center mb-4">Staff Profile</h3>
+
+  <div class="card shadow p-4 mx-auto" style="max-width:500px;">
+    <div class="text-center mb-3">
+      <i class="bi bi-person-circle" style="font-size:60px;"></i>
+    </div>
+
+    <h2 class="text-center">Staff Profile</h2>
+
+    <p><strong>Name:</strong> {{ user.Full_Name }}</p>
+    <p><strong>Email:</strong> {{ user.Email }}</p>
+    <p><strong>Phone:</strong> {{ user.Phone }}</p>
+    <p><strong>Gender:</strong> {{ user.Gender }}</p>
+    <p><strong>DOB:</strong> {{ user.DOB }}</p>
+    <p><strong>Hospital:</strong> {{ hospital.Name }}</p>
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('staff_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-danger ms-2">Logout</a>
+    </div>
+  </div>
+</div>

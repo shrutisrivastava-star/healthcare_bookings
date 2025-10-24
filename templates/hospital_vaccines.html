@@ -1,13 +1,27 @@
-<h2>Available Slots at {{ hospital.Name }}</h2>
-{% if slots %}
+<h2>Hospitals with {{ vaccine_name }}</h2>
+
+{% if hospitals %}
     <ul>
-    {% for slot in slots %}
+    {% for hospital in hospitals %}
         <li>
-            {{ slot.Vaccine_Name }} | Date: {{ slot.Slot_Date }} | Time: {{ slot.Slot_Time }} | Available: {{ slot.Available }}
-            <a href="{{ url_for('confirm_vaccine_booking', slot_id=slot.Slot_ID) }}">Book</a>
+            <strong>{{ hospital.Name }}</strong> - {{ hospital.Street_Address }}
+            {% if hospital.vaccine_slots %}
+                <ul>
+                {% for slot in hospital.vaccine_slots %}
+                    <li>
+                        Date: {{ slot.Slot_Date }} - Available: {{ slot.Available }}
+                        <form action="{{ url_for('confirm_vaccine_booking_route', slot_id=slot.Slot_ID) }}" method="POST" style="display:inline;">
+                            <button type="submit">Book & Pay</button>
+                        </form>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No slots available for this hospital.</p>
+            {% endif %}
         </li>
     {% endfor %}
     </ul>
 {% else %}
-    <p>No slots available.</p>
+    <p>No hospitals available for this vaccine.</p>
 {% endif %}

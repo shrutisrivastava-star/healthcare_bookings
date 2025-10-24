@@ -2,27 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Healthcare Booking System{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital Booking{% endblock %}</title>
+    
+    <!-- Bootstrap (optional) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .flash-message {
+            margin-top: 20px;
+        }
+    </style>
+    
+    {% block head %}{% endblock %}
 </head>
 <body>
-    <header>
-        <h1>Healthcare Booking System</h1>
-        <nav>
-            <a href="/">Home</a> |
-            <a href="/my_bookings">My Bookings</a> |
-            <a href="/logout">Logout</a>
-        </nav>
-        <hr>
-    </header>
-
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <footer>
-        <hr>
-        <p>&copy; 2025 Healthcare Booking System</p>
-    </footer>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="container flash-message">
+                {% for msg in messages %}
+                    <div class="alert alert-info">{{ msg }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+    
+    <!-- Optional Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block scripts %}{% endblock %}
 </body>
 </html>

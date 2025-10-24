@@ -1,10 +1,14 @@
+
 <!DOCTYPE html>
+
+
 <html>
 <head>
     <title>Register</title>
 </head>
 <body>
     <h2>Register</h2>
+
     <form method="POST" action="{{ url_for('register') }}">
         <label>Full Name:</label>
         <input type="text" name="full_name" required><br><br>
@@ -25,11 +29,34 @@
             <option value="Female">Female</option>
             <option value="Other">Other</option>
         </select><br><br>
+        
+
 
         <label>Date of Birth:</label>
         <input type="date" name="dob"><br><br>
 
+        <label>Register As:</label>
+        <select name="role" id="role" required>
+            <option value="patient">Patient</option>
+            <option value="staff">Staff</option>
+        </select><br><br>
+
+        <div id="hospital-div" style="display:none;">
+            <label>Select Hospital:</label>
+            <select name="hospital_id">
+                {% for hospital in hospitals %}
+                <option value="{{ hospital.Hospital_ID }}">{{ hospital.Name }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+
         <button type="submit">Register</button>
     </form>
+
+    <script>
+    document.getElementById('role').addEventListener('change', function(){
+        document.getElementById('hospital-div').style.display = this.value === 'staff' ? 'block' : 'none';
+    });
+    </script>
 </body>
 </html>

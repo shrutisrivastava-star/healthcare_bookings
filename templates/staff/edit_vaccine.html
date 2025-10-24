@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Vaccine Slot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Edit Vaccine Slot</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label>Vaccine Name</label>
+            <input type="text" name="vaccine_name" class="form-control" value="{{ vaccine.Vaccine_Name }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Slot Date</label>
+            <input type="date" name="slot_date" class="form-control" value="{{ vaccine.Slot_Date }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Slot Time</label>
+            <input type="time" name="slot_time" class="form-control" value="{{ vaccine.Slot_Time }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Capacity</label>
+            <input type="number" name="capacity" class="form-control" min="1" value="{{ vaccine.Capacity }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Available</label>
+            <input type="number" name="available" class="form-control" min="0" value="{{ vaccine.Available }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Slot</button>
+        <a href="{{ url_for('manage_vaccines') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+</body>
+</html>

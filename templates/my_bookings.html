@@ -16,15 +16,22 @@
     <tr>
         <td>{{ booking.Booking_ID }}</td>
         <td>{{ booking.Type }}</td>
-        <td>{{ booking.Hospital_Name or 'N/A' }}</td>
+        <td>{{ booking.Hospital_Name }}</td>
         <td>{{ booking.Status }}</td>
         <td>{{ booking.Appointment_date }}</td>
-
     </tr>
     {% endfor %}
 </table>
 {% else %}
 <p>You have no bookings yet.</p>
 {% endif %}
+
+<!-- Navigation buttons -->
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('dashboard') }}" 
+       style="padding: 8px 15px; background: #007bff; color: white; border-radius: 5px; text-decoration: none;">Back to Dashboard</a>
+    <a href="{{ url_for('logout') }}" 
+       style="padding: 8px 15px; background: #dc3545; color: white; border-radius: 5px; text-decoration: none; margin-left: 10px;">Logout</a>
+</div>
 
 {% endblock %}

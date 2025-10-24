@@ -1,0 +1,27 @@
+<div class="container mt-5">
+  <h3 class="mb-4 text-center">Update Booking</h3>
+
+  <a href="{{ url_for('staff_bookings') }}" class="btn btn-sm btn-secondary mb-3">Back to Bookings</a>
+
+  <form method="POST" action="{{ url_for('update_bookings', booking_id=booking.Booking_ID) }}">
+
+    <div class="mb-3">
+      <label>Status</label>
+      <select class="form-select" name="status" required>
+        <option value="Pending" {% if booking.Status == 'Pending' %}selected{% endif %}>Pending</option>
+        <option value="Confirmed" {% if booking.Status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+        <option value="Completed" {% if booking.Status == 'Completed' %}selected{% endif %}>Completed</option>
+        <option value="Cancelled" {% if booking.Status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+      </select>
+    </div>
+
+    {% if booking.Remarks is defined %}
+    <div class="mb-3">
+      <label>Remarks (optional)</label>
+      <textarea name="remarks" class="form-control" rows="3">{{ booking.Remarks }}</textarea>
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary w-100">Update Booking</button>
+  </form>
+</div>

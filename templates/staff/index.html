@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1>Welcome to the Hospital Booking System</h1>
+    <p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
+        or
+        <a href="{{ url_for('register') }}" class="btn btn-secondary">Register</a>
+    </p>
+</div>
+{% endblock %}

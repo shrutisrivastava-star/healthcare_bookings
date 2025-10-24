@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Hospital Bookings</h2>
+
+<!-- Navigation buttons -->
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('staff_dashboard') }}" class="btn">Back to Dashboard</a>
+    <a href="{{ url_for('logout') }}" class="btn" style="margin-left: 10px;">Logout</a>
+</div>
+
+{% if bookings %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <tr>
+        <th>User Name</th>
+        <th>Bed / Vaccine</th>
+        <th>Status</th>
+        <th>Appointment Date</th>
+        <th>Actions</th> <!-- Make sure this is still here -->
+    </tr>
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking['User_Name'] }}</td>
+<td>{{ booking['Item_Name'] }}</td>
+<td>{{ booking['Status'] }}</td>
+<td>{{ booking['Appointment_date'] }}</td>
+<a href="{{ url_for('update_bookings', booking_id=booking['Booking_ID']) }}">Edit</a> |
+<a href="{{ url_for('delete_booking', booking_id=booking['Booking_ID']) }}">Delete</a>
+
+            <!-- Edit/Delete buttons -->
+           <a href="{{ url_for('update_bookings', booking_id=booking.Booking_ID) }}">Edit</a> |
+
+            <a href="{{ url_for('delete_booking', booking_id=booking.Booking_ID) }}" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No bookings found.</p>
+{% endif %}
+{% endblock %}
