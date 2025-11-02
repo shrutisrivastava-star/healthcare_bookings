@@ -1,41 +1,466 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Beds | Healthcare Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: #374151;
+            padding: 0;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 8px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .manage-beds-header {
+            margin-bottom: 40px;
+        }
+        
+        .manage-beds-header h2 {
+            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1f2937;
+            letter-spacing: -0.5px;
+        }
+        
+        .manage-beds-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            color: #374151;
+            border: 1.5px solid #e5e7eb;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            border-color: #6366f1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Table Styling */
+        .beds-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .beds-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .beds-table thead {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .beds-table th {
+            padding: 16px 20px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .beds-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+        }
+        
+        .beds-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .beds-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .status-available {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-booked {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .actions-cell {
+            white-space: nowrap;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid;
+        }
+        
+        .btn-edit {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #dbeafe;
+        }
+        
+        .btn-edit:hover {
+            background: #dbeafe;
+            transform: translateY(-1px);
+        }
+        
+        .btn-delete {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+        
+        .btn-delete:hover {
+            background: #fecaca;
+            transform: translateY(-1px);
+        }
+        
+        .no-beds {
+            text-align: center;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .no-beds i {
+            font-size: 48px;
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+        
+        .no-beds h3 {
+            color: #374151;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .no-beds p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .beds-table-container {
+                overflow-x: auto;
+            }
+            
+            .beds-table {
+                min-width: 600px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+                <h1>Healthcare Portal</h1>
+                <p>Staff Dashboard</p>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('staff_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('manage_beds') }}" class="active"><i class="fas fa-bed"></i> Manage Beds</a></li>
+                <li><a href="{{ url_for('manage_vaccines') }}"><i class="fas fa-syringe"></i> Manage Vaccines</a></li>
+                <li><a href="{{ url_for('staff_bookings') }}"><i class="fas fa-calendar-check"></i> Manage Bookings</a></li>
+                <li><a href="{{ url_for('staff_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="manage-beds-header">
+                <h2>Manage Beds</h2>
+                <p>View and manage hospital bed inventory</p>
+            </div>
+            
+            {% with errors = get_flashed_messages(with_categories=false, category_filter=['error']) %}
+              {% if errors %}
+                <!-- modal popup for error flashes only -->
+                <div id="flash-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:9999;">
+                  <div style="background:#fff;border-radius:8px;padding:18px 20px;max-width:520px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+                    <button id="flash-modal-close" style="float:right;border:none;background:transparent;font-size:20px;cursor:pointer;">&times;</button>
+                    <div style="clear:both"></div>
+                    {% for message in errors %}
+                      <div class="flash-item flash-error" style="margin-top:8px;padding:12px;border-radius:6px;background:linear-gradient(135deg,#fee2e2,#fecaca);color:#7f1d1d;">
+                        {{ message }}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
 
-{% block content %}
-<h1>Manage Beds</h1>
-<a href="{{ url_for('staff_dashboard') }}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+                <script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    var modal = document.getElementById('flash-modal');
+                    if (!modal) return;
+                    var close = document.getElementById('flash-modal-close');
+                    modal.style.display = 'flex';
+                    close.addEventListener('click', function(){ modal.style.display = 'none'; });
+                    setTimeout(function(){ if(modal) modal.style.display = 'none'; }, 4000);
+                  });
+                </script>
+              {% endif %}
+            {% endwith %}
 
-<a href="{{ url_for('new_bed') }}" class="btn btn-primary">Add New Bed</a>
-
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>Bed Type</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for bed in beds %}
-        <tr>
-            <td>{{ bed.Bed_Type }}</td>
-            <td>{{ bed.Status }}</td>
-            <td>
-                <a href="{{ url_for('edit_bed', bed_id=bed.Bed_ID) }}" class="btn btn-warning btn-sm">Edit</a>
-
-                <!-- Delete form -->
-                <form action="{{ url_for('delete_bed', bed_id=bed.Bed_ID) }}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger btn-sm"
-                        onclick="return confirm('Are you sure you want to delete this bed?')">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="3">No beds found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}
+            <div class="action-bar">
+                <a href="{{ url_for('new_bed') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add New Bed
+                </a>
+                <a href="{{ url_for('staff_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+            
+            {% if beds %}
+            <div class="beds-table-container">
+                <table class="beds-table">
+                    <thead>
+                        <tr>
+                            <th>Bed ID</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bed in beds %}
+                        <tr>
+                            <td>{{ bed.Bed_ID }}</td>
+                            <td>{{ bed.Bed_Type }}</td>
+                            <td>
+                                <span class="status-badge status-{{ bed.Status }}">
+                                    {{ bed.Status }}
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('edit_bed', bed_id=bed.Bed_ID) }}" class="btn-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <form method="POST" action="{{ url_for('delete_bed', bed_id=bed.Bed_ID) }}" style="display:inline;">
+                                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this bed?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-beds">
+                <i class="fas fa-bed"></i>
+                <h3>No Beds Found</h3>
+                <p>There are currently no beds in the system. Add a new bed to get started.</p>
+                <a href="{{ url_for('new_bed') }}" class="btn btn-success" style="margin-top: 20px;">
+                    <i class="fas fa-plus"></i> Add New Bed
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

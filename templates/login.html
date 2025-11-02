@@ -256,6 +256,46 @@
             <p>Sign in to access your account</p>
         </div>
         
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <!-- modal popup for flashed messages -->
+            <div id="flash-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:9999;">
+                <div style="background:#fff;border-radius:8px;padding:18px 20px;max-width:520px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+                <button id="flash-modal-close" style="float:right;border:none;background:transparent;font-size:20px;cursor:pointer;">&times;</button>
+                <div style="clear:both"></div>
+                {% for category, message in messages %}
+                    {% if category != 'hidden' %}
+                        {% if category in ['error','danger'] %}
+                            <div class="flash-item flash-error" style="margin-top:8px;padding:12px;border-radius:6px;background:linear-gradient(135deg,#fee2e2,#fecaca);color:#7f1d1d;">
+                                {{ message }}
+                            </div>
+                        {% elif category in ['success','info'] %}
+                            <div class="flash-item flash-success" style="margin-top:8px;padding:12px;border-radius:6px;background:linear-gradient(135deg,#e6fffa,#d1fae5);color:#065f46;">
+                                {{ message }}
+                            </div>
+                        {% else %}
+                            <div class="flash-item" style="margin-top:8px;padding:12px;border-radius:6px;background:#ebf8ff;color:#0b4a6f;">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                var modal = document.getElementById('flash-modal');
+                if (!modal) return;
+                var close = document.getElementById('flash-modal-close');
+                modal.style.display = 'flex';
+                close.addEventListener('click', function(){ modal.style.display = 'none'; });
+                setTimeout(function(){ if(modal) modal.style.display = 'none'; }, 4000);
+                });
+            </script>
+            {% endif %}
+        {% endwith %}
+
         <div class="login-body">
             <form method="POST">
                 <div class="form-group">
@@ -282,7 +322,9 @@
                         <input type="checkbox" id="remember">
                         <label for="remember">Remember me</label>
                     </div>
-                    <a href="#" class="forgot-password">Forgot password?</a>
+                    <a href="{{ url_for('forgot_password') }}" style="color: #6366f1; text-decoration: none;">
+                        <i class="fas fa-key"></i> Forgot Password?
+                    </a>
                 </div>
                 
                 <button type="submit" class="submit-btn">Sign In</button>

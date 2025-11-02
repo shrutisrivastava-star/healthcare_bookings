@@ -1,29 +1,373 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Staff Dashboard</title>
-    <!-- Bootstrap CSS (optional, for styling) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | Healthcare Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: #374151;
+            padding: 0;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 8px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-header h2 {
+            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1f2937;
+            letter-spacing: -0.5px;
+        }
+        
+        .dashboard-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stat-card.beds {
+            border-left-color: #6366f1;
+        }
+        
+        .stat-card.vaccines {
+            border-left-color: #10b981;
+        }
+        
+        .stat-card.bookings {
+            border-left-color: #f59e0b;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .stat-card.beds .stat-icon {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .stat-card.vaccines .stat-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .stat-card.bookings .stat-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .stat-card .count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        
+        /* Hospital Info Card */
+        .hospital-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .hospital-card h3 {
+            font-weight: 600;
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .hospital-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Welcome, {{ user.Full_Name }}</h2>
-
-    <!-- Hospital Info -->
-    <div class="card mb-4 shadow p-3">
-        <h5>Hospital: {{ hospital.Name }}</h5>
-        <p><strong>Total Beds:</strong> {{ beds_count }}</p>
-        <p><strong>Total Vaccines:</strong> {{ vaccines_count }}</p>
-        <p><strong>Total Bookings:</strong> {{ bookings_count }}</p>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+                <h1>Healthcare Portal</h1>
+                <p>Staff Dashboard</p>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('manage_beds') }}"><i class="fas fa-bed"></i> Manage Beds</a></li>
+                <li><a href="{{ url_for('manage_vaccines') }}"><i class="fas fa-syringe"></i> Manage Vaccines</a></li>
+                <li><a href="{{ url_for('staff_bookings') }}"><i class="fas fa-calendar-check"></i> Manage Bookings</a></li>
+                <li><a href="{{ url_for('staff_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h2>Welcome, {{ user.Full_Name }}</h2>
+                <p>Manage your hospital resources and appointments</p>
+            </div>
+            
+            <!-- Hospital Info -->
+            <div class="hospital-card">
+                <h3>Hospital Information</h3>
+                <div class="hospital-info">
+                    <div class="info-item">
+                        <span class="info-label">Hospital Name</span>
+                        <span class="info-value">{{ hospital.Name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total Beds</span>
+                        <span class="info-value" id="beds-count">{{ beds_count }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total Vaccines</span>
+                        <span class="info-value" id="vaccines-count">{{ vaccines_count }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total Bookings</span>
+                        <span class="info-value" id="bookings-count">{{ bookings_count }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card beds">
+                    <div class="stat-icon">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <h3>TOTAL BEDS</h3>
+                    <div class="count" id="beds-stat">{{ beds_count }}</div>
+                    <div class="label">Available for patients</div>
+                </div>
+                
+                <div class="stat-card vaccines">
+                    <div class="stat-icon">
+                        <i class="fas fa-syringe"></i>
+                    </div>
+                    <h3>TOTAL VACCINES</h3>
+                    <div class="count" id="vaccines-stat">{{ vaccines_count }}</div>
+                    <div class="label">In stock</div>
+                </div>
+                
+                <div class="stat-card bookings">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>TOTAL BOOKINGS</h3>
+                    <div class="count" id="bookings-stat">{{ bookings_count }}</div>
+                    <div class="label">Active appointments</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="d-grid gap-3">
         <a href="{{ url_for('manage_beds') }}" class="btn btn-primary btn-lg">Manage Beds</a>
         <a href="{{ url_for('manage_vaccines') }}" class="btn btn-success btn-lg">Manage Vaccines</a>
-        <a href="{{ url_for('staff_bookings') }}" class="btn btn-warning btn-lg">Manage Bookings</a>
-        <a href="{{ url_for('staff_payments') }}" class="btn btn-secondary btn-lg">View Payments</a> <!-- Added -->
-        <a href="{{ url_for('staff_profile') }}" class="btn btn-info btn-lg text-white">View Profile</a>
+        <a href="{{ url_for('bookings') }}" class="btn btn-warning btn-lg">Manage Bookings</a>
+        <a href="{{ url_for('payments') }}" class="btn btn-secondary btn-lg">View Payments</a> <!-- Added -->
+        <a href="{{ url_for('profile') }}" class="btn btn-info btn-lg text-white">View Profile</a>
         <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg">Logout</a>
     </div>
 </div>
