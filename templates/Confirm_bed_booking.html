@@ -4,16 +4,17 @@
     <title>Confirm Bed Booking</title>
 </head>
 <body>
-    <h2>Confirm Bed Booking</h2>
+    <h2>Confirm Your Bed Booking</h2>
+
     <p><strong>Patient Name:</strong> {{ user.Full_Name }}</p>
     <p><strong>Hospital:</strong> {{ hospital.Name }}</p>
     <p><strong>Bed Type:</strong> {{ bed.Bed_Type }}</p>
-    <p><strong>Price:</strong> ₹1000 <!-- Optional: you can calculate dynamically --></p>
+    <p><strong>Status:</strong> {{ bed.Status }}</p>
 
-    <form method="POST">
-        <button type="submit">Confirm Booking</button>
+    <form method="POST" action="{{ url_for('confirm_bed_booking_route', bed_id=bed.Bed_ID) }}">
+        <button type="submit">Confirm & Pay</button>
     </form>
 
-    <a href="{{ url_for('hospital_beds_page', hospital_id=hospital.Hospital_ID, bed_type=bed.Bed_Type) }}">Back</a>
+    <a href="{{ url_for('available_beds') }}">Back</a>
 </body>
 </html>

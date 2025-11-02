@@ -1,33 +1,47 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from models import db, Users, Hospitals, Beds, Bookings, Vaccines, AuditLogs
+from models import db, Users, Hospitals, Beds, Bookings, Vaccines, AuditLogs, Payments
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import date, datetime
 import os
 from dotenv import load_dotenv
 from sqlalchemy.orm import joinedload
+from flask_login import current_user,login_required,login_user, logout_user, LoginManager
 
-from models import db, Users, Hospitals, Beds, Bookings, Vaccines, AuditLogs
+load_dotenv()
 
-
-load_dotenv()  # load environment variables from .env
-
-# ------------------ Flask Setup ------------------
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'firstapp')  # session secret
+
 db_user = os.environ.get('DB_USER')
 db_pass = os.environ.get('DB_PASS')
 db_host = os.environ.get('DB_HOST')
 db_name = os.environ.get('DB_NAME')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}"
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 with app.app_context():
     db.create_all()
 
+from flask_login import LoginManager
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+
 # ------------------ Helpers ------------------
+def get_logged_in_user():
+    if 'user_id' in session:
+        return Users.query.get(session['user_id'])
+    return None
+
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -37,13 +51,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
-def get_logged_in_user():
-    if 'user_id' in session:
-        return Users.query.get(session['user_id'])
-    return None
-
 def log_audit(user_id, table_name, record_id=None, action=None, details=None):
-    """Create an audit log entry."""
     log = AuditLogs(
         User_ID=user_id,
         Table_Name=table_name,
@@ -54,47 +62,67 @@ def log_audit(user_id, table_name, record_id=None, action=None, details=None):
     db.session.add(log)
     db.session.commit()
 
+
 # ------------------ Routes ------------------
 @app.route('/')
 def home():
-    return "Hospital Booking Backend Running!"
+    return render_template('home.html')  # your homepage with login/signup buttons
+
 
 # ---------- Register ----------
-@app.route('/register', methods=['GET','POST'])
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     hospitals = Hospitals.query.all()
+
     if request.method == 'POST':
-        full_name = request.form.get('full_name')
-        email = request.form.get('email')
+        full_name = request.form['full_name']
+        email = request.form['email']
+        password = request.form['password']
         phone = request.form.get('phone')
-        password = request.form.get('password')
-        role = request.form.get('role')  # patient/staff
-        hospital_id = request.form.get('hospital_id') if role.lower() == 'staff' else None
         gender = request.form.get('gender')
         dob = request.form.get('dob')
+        role = request.form.get('role')
+        hospital_id = request.form.get('hospital_id') if role == 'staff' else None
 
-        if Users.query.filter_by(Email=email).first():
-            flash("Email already registered. Please login.")
-            return redirect(url_for('login'))
+        # New address fields
+        street_address = request.form.get('street_address')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        pincode = request.form.get('pincode')
 
-        user = Users(
+        # Hash password
+        hashed_password = generate_password_hash(password)
+
+        # Create new user record
+        new_user = Users(
             Full_Name=full_name,
             Email=email,
+            Password=hashed_password,
             Phone=phone,
-            Password=generate_password_hash(password),
-            Role=role.lower(),
-            Hospital_ID=hospital_id,
             Gender=gender,
-            DOB=dob
+            DOB=dob,
+            Role=role,
+            Hospital_ID=hospital_id,
+            Street_Address=street_address,
+            City=city,
+            State=state,
+            Pincode=pincode
         )
-        db.session.add(user)
+
+        # Add to DB and commit
+        db.session.add(new_user)
         db.session.commit()
-        flash(f"{role.capitalize()} registered successfully!")
+        flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('login'))
 
+    # GET request or failed POST renders registration page
     return render_template('register.html', hospitals=hospitals)
 
+
 # ---------- Login ----------
+from flask_login import login_user, logout_user
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
@@ -102,22 +130,30 @@ def login():
         password = request.form.get('password')
         user = Users.query.filter_by(Email=email).first()
         if user and check_password_hash(user.Password, password):
+            # Mark user as logged in for Flask-Login
+            login_user(user)
+
+            # Optionally keep your session values if you use them elsewhere
             session['user_id'] = user.User_ID
             session['role'] = user.Role
-            flash("Login successful!")
+
+            flash("Login successful!", "success")
             if user.Role == 'staff':
                 return redirect(url_for('staff_dashboard'))
             return redirect(url_for('dashboard'))
         else:
-            flash("Invalid credentials!")
+            flash("Invalid credentials!", "danger")
     return render_template('login.html')
+
 
 # ---------- Logout ----------
 @app.route('/logout')
 def logout():
+    logout_user()
     session.clear()
     flash("Logged out!")
     return redirect(url_for('login'))
+
 
 # ---------- Patient Dashboard ----------
 @app.route('/dashboard')
@@ -154,126 +190,353 @@ def my_bookings():
     return render_template('my_bookings.html', bookings=booking_details, user=user)
 
 # ---------- Bed Booking ----------
-@app.route('/book_bed', methods=['GET','POST'])
+# Step 1: Select Bed Type and Date
+@app.route('/book_bed', methods=['GET', 'POST'])
 @login_required
 def book_bed_select():
+    user = get_logged_in_user()
+    bed_types = [b[0] for b in db.session.query(Beds.Bed_Type).distinct().all()]
+
     if request.method == 'POST':
         session['bed_type'] = request.form.get('bed_type')
+        session['selected_date'] = request.form.get('date')
+        try:
+            selected_date = datetime.strptime(session['selected_date'], "%Y-%m-%d").date()
+            if selected_date < date.today():
+                flash("⚠️ Please select a valid (future) date — past dates are not allowed.", "warning")
+                return redirect(url_for('book_bed_select'))
+        except Exception as e:
+            flash("Invalid date format. Please select a valid date.", "danger")
+            return redirect(url_for('book_bed_select'))
         return redirect(url_for('available_beds'))
-    bed_types = [b[0] for b in db.session.query(Beds.Bed_Type).distinct().all()]
-    return render_template('book_bed.html', bed_types=bed_types)
 
+    hospitals = Hospitals.query.filter_by(City=user.City).all()
+    return render_template('book_bed.html', bed_types=bed_types, hospitals=hospitals)
+
+
+
+
+# Step 2: Show Available Beds (filtered by user's city)
 @app.route('/available_beds')
 @login_required
 def available_beds():
+    user = get_logged_in_user()
     bed_type = session.get('bed_type')
+    selected_date = session.get('selected_date')
+
+    if not user:
+        flash("User not found. Please log in again.")
+        return redirect(url_for('login'))
+
+    if not user.City:
+        flash("Please update your profile with your city to see available beds.")
+        return redirect(url_for('dashboard'))
+
     if not bed_type:
         flash("Select a bed type first")
         return redirect(url_for('book_bed_select'))
-    beds = db.session.query(Beds, Hospitals).join(Hospitals)\
-        .filter(Beds.Bed_Type==bed_type, Beds.Status=='available').all()
-    return render_template('available_beds.html', beds=beds, bed_type=bed_type)
 
+    beds = (
+        db.session.query(Beds, Hospitals)
+        .join(Hospitals)
+        .filter(
+            db.func.lower(Beds.Bed_Type) == bed_type.lower(),
+            db.func.lower(Beds.Status) == 'available',
+            db.func.lower(Hospitals.City) == user.City.lower()
+        )
+        .all()
+    )
+
+    return render_template(
+        'available_beds.html',
+        beds=beds,
+        bed_type=bed_type,
+        selected_date=selected_date
+    )
+
+
+
+
+
+
+
+
+# Step 3: Confirm Bed Booking Page (GET)
+@app.route('/book_bed/<int:bed_id>/confirm', methods=['GET'])
+@login_required
+def confirm_bed_booking(bed_id):
+    bed = Beds.query.get_or_404(bed_id)
+    hospital = Hospitals.query.get(bed.Hospital_ID)
+    user = get_logged_in_user()
+    return render_template('confirm_bed_booking.html', bed=bed, hospital=hospital, user=user)
+
+
+# Step 4: Confirm & Save Booking (POST)
 @app.route('/book_bed/<int:bed_id>/confirm', methods=['POST'])
 @login_required
 def confirm_bed_booking_route(bed_id):
     bed = Beds.query.get_or_404(bed_id)
     user = get_logged_in_user()
+
+    # Create a booking but **do not mark it paid yet**
     booking = Bookings(
         User_ID=user.User_ID,
         Bed_ID=bed.Bed_ID,
         Booking_Type='bed',
         Booking_date=date.today(),
         appointment_date=date.today(),
-        Status='confirmed'
+        Status='pending'  # pending until payment
     )
     db.session.add(booking)
-    bed.Status = 'booked'
     db.session.commit()
-    log_audit(user.User_ID, "bookings", booking.Booking_ID, "created", f"Bed {bed.Bed_ID} booked")
-    flash("Bed booked successfully and logged!")
-    return redirect(url_for('my_bookings'))
+
+    # Store booking ID in session to pass to payment page
+    session['current_booking_id'] = booking.Booking_ID
+    session['amount'] = 5000  # or fetch from bed type / pricing table
+
+    return redirect(url_for('payment_page'))
+
 
 # ---------- Vaccine Booking ----------
-
 @app.route('/book_vaccine', methods=['GET', 'POST'])
-@login_required
-def book_vaccine_select():
+def book_vaccine():
     if request.method == 'POST':
-        session['vaccine_name'] = request.form.get('vaccine_name')
-        return redirect(url_for('available_vaccines'))
+        vaccine_name = request.form.get('vaccine_name')
+        slot_date_str = request.form.get('slot_date')
 
-    # Get distinct vaccine names
-    vaccines = [v.Vaccine_Name for v in Vaccines.query.distinct(Vaccines.Vaccine_Name).all()]
-    return render_template('book_vaccine.html', vaccines=vaccines)
+        from datetime import datetime
+        slot_date = datetime.strptime(slot_date_str, '%Y-%m-%d').date()
 
-@app.route('/available_vaccines')
+        # Find vaccines where:
+        # 1️⃣ Vaccine name matches (case-insensitive)
+        # 2️⃣ Slot date is BEFORE OR EQUAL TO selected date
+        # 3️⃣ Available > 0
+        vaccines = Vaccines.query.filter(
+            db.func.lower(Vaccines.Vaccine_Name) == vaccine_name.lower(),
+            Vaccines.Slot_Date <= slot_date,
+            Vaccines.Available > 0
+        ).all()
+
+        if not vaccines:
+            flash(f"No available slots found for {vaccine_name} before or on {slot_date}.")
+            return render_template('available_vaccine.html', vaccines=[])
+
+        # ✅ Show available slots (with hospital details)
+        return render_template('available_vaccine.html', vaccines=vaccines)
+
+    # GET request — show vaccine name dropdown
+    vaccine_names = [v.Vaccine_Name.capitalize() for v in Vaccines.query.all()]
+    return render_template(
+        'book_vaccine.html',
+        vaccine_names=sorted(set(vaccine_names), key=str.lower)
+    )
+
+
+
+
+
+from datetime import datetime
+from flask import render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
+
+
+@app.route('/available_vaccines', methods=['GET', 'POST'])
 @login_required
 def available_vaccines():
-    vaccine_name = session.get('vaccine_name')
-    if not vaccine_name:
-        flash("Select a vaccine first")
-        return redirect(url_for('book_vaccine_select'))
+    from datetime import datetime, date
 
-    # Fetch all hospitals that have this vaccine available
-    hospitals = Hospitals.query.join(Vaccines)\
-        .filter(Vaccines.Vaccine_Name == vaccine_name, Vaccines.Available > 0)\
+    vaccine_name = request.form.get('vaccine_name')
+    slot_date_str = request.form.get('slot_date')
+
+    print("\n🧠 --- DEBUG: Vaccine Availability Check ---")
+    print("Raw form data:", vaccine_name, slot_date_str)
+
+    # 🧩 Parse date safely
+    try:
+        if "-" in slot_date_str and len(slot_date_str.split("-")[0]) == 4:
+            slot_date = datetime.strptime(slot_date_str, "%Y-%m-%d").date()
+        else:
+            slot_date = datetime.strptime(slot_date_str, "%d-%m-%Y").date()
+    except Exception as e:
+        flash("❌ Invalid date format. Please use YYYY-MM-DD or DD-MM-YYYY.", "danger")
+        print("❌ Date parsing failed:", e)
+        return redirect(url_for('book_vaccine'))
+
+    print("✅ Parsed slot_date:", slot_date)
+    session['selected_date'] = slot_date.strftime("%Y-%m-%d")
+
+    # 🚫 If date is in the past
+    if slot_date < date.today():
+        flash("⚠️ Please enter a valid (future) date — past dates are not allowed.", "warning")
+        return redirect(url_for('book_vaccine'))
+
+    # 👤 Get user city
+    user = get_logged_in_user()
+    user_city = user.City.strip().lower() if user.City else None
+    print(f"🏙️ Filtering by user city: {user_city}")
+
+    # 🧠 Debug: show all vaccines
+    all_vaccines = db.session.query(Vaccines).join(Hospitals, Vaccines.Hospital_ID == Hospitals.Hospital_ID).all()
+    print("\n📋 DEBUG: Showing all vaccines in DB for reference:")
+    for v in all_vaccines:
+        print(f"   -> ID:{v.Slot_ID}, Name:{v.Vaccine_Name}, Date:{v.Slot_Date}, City:{v.hospital.City}, Avail:{v.Available}")
+
+    # ✅ Query: same city, same vaccine, available > 0
+    vaccines = (
+        db.session.query(Vaccines)
+        .join(Hospitals, Vaccines.Hospital_ID == Hospitals.Hospital_ID)
+        .filter(
+            db.func.lower(Vaccines.Vaccine_Name) == vaccine_name.lower(),
+            db.func.lower(Hospitals.City) == user_city,
+            Vaccines.Available > 0
+        )
         .all()
+    )
 
-    # Attach slots to each hospital
-    for hospital in hospitals:
-        hospital.vaccine_slots = Vaccines.query.filter_by(
-            Hospital_ID=hospital.Hospital_ID, Vaccine_Name=vaccine_name
-        ).filter(Vaccines.Available > 0).all()
+    print(f"\n🔍 Querying for vaccine='{vaccine_name.lower()}', city={user_city}, future date OK")
+    print(f"✅ Query result count: {len(vaccines)}")
 
-    return render_template('available_vaccines.html', hospitals=hospitals, vaccine_name=vaccine_name)
+    if not vaccines:
+        flash(f"No available slots for {vaccine_name} in your city ({user_city.title()}).", "info")
+        return render_template(
+            'available_vaccines.html',
+            vaccines=[],
+            message=f"No available slots for {vaccine_name} in your city ({user_city.title()})."
+        )
 
-    # ------------------------------------------------------------
-    # Vaccine Booking Confirmation and Payment Flow
-    # ------------------------------------------------------------
+    # ✅ Show results
+    return render_template('available_vaccines.html', vaccines=vaccines)
 
 
-@app.route('/book_vaccine/<int:slot_id>/confirm', methods=['GET'])
+
+
+
+
+@app.route('/confirm_vaccine/<int:slot_id>')
 @login_required
-def confirm_vaccine_booking_route(slot_id):
+def confirm_vaccine(slot_id):
     slot = Vaccines.query.get(slot_id)
     if not slot:
-        flash("Vaccine slot not found.")
+        flash("Invalid vaccine slot selected.", "danger")
         return redirect(url_for('available_vaccines'))
 
-    return render_template('confirm_vaccine_booking.html', slot=slot)
+    hospital = Hospitals.query.get(slot.Hospital_ID)
+
+    # ✅ Use selected date from session, fallback to slot date if missing
+    selected_date_str = session.get('selected_date')
+    if selected_date_str:
+        appointment_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+    else:
+        appointment_date = slot.Slot_Date
+
+    return render_template(
+        'confirm_vaccine_booking.html',
+        slot=slot,
+        hospital=hospital,
+        appointment_date=appointment_date  # ✅ send to template
+    )
 
 
-
-@app.route('/book_vaccine/<int:slot_id>/pay', methods=['POST'])
+@app.route('/book_vaccine_final/<int:slot_id>', methods=['POST'])
 @login_required
-def process_vaccine_payment_route(slot_id):
-    slot = Vaccines.query.get(slot_id)
+def book_vaccine_final(slot_id):
+    print(f"🧠 --- DEBUG: Booking Vaccine Slot --- for Slot ID: {slot_id}")
+
+    vaccine_slot = Vaccines.query.get(slot_id)
     user = get_logged_in_user()
 
-    if not slot:
-        flash("Slot not found.")
+    if not vaccine_slot or vaccine_slot.Available <= 0:
+        flash("Selected slot is no longer available.", "danger")
         return redirect(url_for('available_vaccines'))
 
-    # Create booking
-    booking = Bookings(
-        User_ID=user.User_ID,
-        Vaccine_ID=slot.Slot_ID,
-        Booking_Type='Vaccine',
-        Booking_date=date.today(),
-        appointment_date=slot.Slot_Date,
-        Status='Confirmed'
-    )
-    db.session.add(booking)
+    # ✅ Get appointment date selected by user from session (NOT slot date)
+    selected_date_str = session.get('selected_date')
+    if selected_date_str:
+        try:
+            appointment_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            appointment_date = vaccine_slot.Slot_Date
+    else:
+        appointment_date = vaccine_slot.Slot_Date
 
-    # Decrease available count
-    if slot.Available > 0:
-        slot.Available -= 1
+    try:
+        # 🔻 Reduce available slot count
+        vaccine_slot.Available -= 1
+        db.session.add(vaccine_slot)
 
-    db.session.commit()
+        # ✅ Create booking record
+        booking = Bookings(
+            User_ID=user.User_ID,
+            Vaccine_ID=vaccine_slot.Slot_ID,
+            Booking_Type='vaccine',
+            Booking_date=date.today(),
+            appointment_date=appointment_date,
+            Status='pending'
+        )
 
-    flash("Booking confirmed successfully!")
-    return redirect(url_for('my_bookings'))
+        db.session.add(booking)
+        db.session.commit()
+
+        # 💾 Save for payment page
+        session['current_booking_id'] = booking.Booking_ID
+        session['amount'] = 500  # Example cost
+
+        print(f"✅ Booking saved: ID={booking.Booking_ID}, Date={appointment_date}, Avail now={vaccine_slot.Available}")
+
+        # ✅ Redirect to payment page
+        flash("Booking confirmed! Proceed to payment.", "success")
+        return redirect(url_for('payment_page'))
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ DB Error: {e}")
+        flash("Something went wrong while booking. Please try again.", "danger")
+        return redirect(url_for('available_vaccines'))
+
+
+
+# ------------------ Payments Route ------------------
+@app.route('/payment', methods=['GET', 'POST'])
+@login_required
+def payment_page():
+    user = get_logged_in_user()
+    booking_id = session.get('current_booking_id')
+    amount = session.get('amount')
+
+    if not booking_id or not amount:
+        flash("No booking selected for payment.")
+        return redirect(url_for('dashboard'))
+
+    booking = Bookings.query.get_or_404(booking_id)
+
+    if request.method == 'POST':
+        payment_method = request.form.get('payment_method')
+
+        # Save payment
+        payment = Payments(
+            User_ID=user.User_ID,
+            Booking_ID=booking.Booking_ID,
+            Booking_Type=booking.Booking_Type,
+            Amount=amount,
+            Payment_Method=payment_method,
+            Payment_Status='Paid',
+            Payment_Date=datetime.now()
+        )
+        db.session.add(payment)
+
+        # Update booking
+        booking.Status = 'confirmed'
+        db.session.commit()
+
+        session.pop('current_booking_id', None)
+        session.pop('amount', None)
+
+        flash("Payment successful! Booking confirmed.")
+        return redirect(url_for('my_bookings'))
+
+    return render_template('payments.html', booking=booking, user=user, amount=amount)
+
+
 
 
 # ---------- Cancel Booking ----------
@@ -294,14 +557,7 @@ from datetime import datetime, date
 from models import db, Users, Hospitals, Beds, Vaccines, Bookings, AuditLogs
 
 # ------------------ Helpers ------------------
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'user_id' not in session:
-            flash("Please login first.")
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated
+
 
 def get_logged_in_user():
     if 'user_id' in session:
@@ -518,49 +774,26 @@ def staff_profile():
     hospital = Hospitals.query.get(user.Hospital_ID)
     return render_template('staff/profile.html', user=user, hospital=hospital)
 
-#---------------Staff Bookings---------
-@app.route('/staff/update_bookings/<int:booking_id>', methods=['GET', 'POST'], endpoint='update_bookings')
-@login_required
-def update_bookings(booking_id):
-    user = get_logged_in_user()
-    if user.Role != 'staff':
-        flash("Access denied.")
-        return redirect(url_for('dashboard'))
 
-    booking = Bookings.query.get(booking_id)
-    if not booking:
-        flash("Booking not found.")
-        return redirect(url_for('staff_bookings'))
-
-    if request.method == 'POST':
-        booking.Status = request.form['status']
-        db.session.commit()
-        flash("Booking updated successfully!")
-        return redirect(url_for('staff_bookings'))
-
-    return render_template('staff/update_bookings.html', booking=booking, user=user)
 
 
 #---------------Staff Bookings---------
 @app.route('/staff/bookings')
 @login_required
 def staff_bookings():
-    user = get_logged_in_user()  # assuming you have a helper function
+    user = get_logged_in_user()
     if user.Role != 'staff':
-        flash("Access denied.")
+        flash("Access denied.", "error")
         return redirect(url_for('dashboard'))
 
-    # Get the hospital for this staff
     hospital = Hospitals.query.get(user.Hospital_ID)
 
-    # Load all bookings with their bed/vaccine relationships
     bookings = Bookings.query.options(
         joinedload(Bookings.bed),
         joinedload(Bookings.vaccine),
-        joinedload(Bookings.user)  # if you have a relationship to Users
+        joinedload(Bookings.user)
     ).all()
 
-    # Filter bookings that belong to this hospital
     booking_details = []
     for b in bookings:
         # Skip bookings not belonging to this hospital
@@ -571,13 +804,74 @@ def staff_bookings():
 
         booking_details.append({
             "Booking_ID": b.Booking_ID,
-            "User_Name": b.user.Full_Name,  # make sure you have a relationship in Booking: user = db.relationship("Users")
+            "User_Name": b.user.Full_Name if b.user else "N/A",
             "Item_Name": b.bed.Bed_Type if b.bed else (b.vaccine.Vaccine_Name if b.vaccine else "N/A"),
             "Status": b.Status,
-            "Appointment_date": b.appointment_date
+            "Appointment_date": b.appointment_date.strftime('%Y-%m-%d') if b.appointment_date else "N/A"
         })
 
-    return render_template('staff/bookings.html', bookings=booking_details)
+    return render_template('staff/bookings.html', bookings=booking_details, user=user)
+
+@app.route('/staff/update_bookings/<int:booking_id>', methods=['GET', 'POST'])
+@login_required
+def update_bookings(booking_id):
+    user = get_logged_in_user()
+    if user.Role != 'staff':
+        flash("Access denied.", "error")
+        return redirect(url_for('dashboard'))
+
+    booking = Bookings.query.get_or_404(booking_id)
+
+    # Ensure staff can only update bookings for their hospital
+    if booking.bed and booking.bed.Hospital_ID != user.Hospital_ID:
+        flash("Cannot edit bookings from another hospital.", "error")
+        return redirect(url_for('staff_bookings'))
+    if booking.vaccine and booking.vaccine.Hospital_ID != user.Hospital_ID:
+        flash("Cannot edit bookings from another hospital.", "error")
+        return redirect(url_for('staff_bookings'))
+
+    if request.method == 'POST':
+        old_status = booking.Status
+        # Update status
+        booking.Status = request.form.get('status')
+        db.session.commit()
+
+        # Audit log
+        details = f"Status: {old_status} -> {booking.Status}"
+        log_audit(user.User_ID, 'bookings', booking.Booking_ID, 'updated', details)
+
+        flash("Booking updated successfully!", "success")
+        return redirect(url_for('staff_bookings'))
+
+    # GET request
+    return render_template('staff/update_bookings.html', booking=booking, user=user)
+
+# Staff view payments
+@app.route('/staff/payments')
+@login_required
+def staff_payments():
+    user = get_logged_in_user()
+    if user.Role != 'staff':
+        flash("Access denied.")
+        return redirect(url_for('dashboard'))
+
+    # Payments related to this staff's hospital
+    payments = Payments.query.options(
+        joinedload(Payments.booking).joinedload(Bookings.bed),
+        joinedload(Payments.booking).joinedload(Bookings.vaccine),
+        joinedload(Payments.booking).joinedload(Bookings.user)
+    ).join(Bookings) \
+        .outerjoin(Beds, Bookings.Bed_ID == Beds.Bed_ID) \
+        .outerjoin(Vaccines, Bookings.Vaccine_ID == Vaccines.Slot_ID) \
+        .filter(
+        (Beds.Hospital_ID == user.Hospital_ID) |
+        (Vaccines.Hospital_ID == user.Hospital_ID)
+    ).all()
+    
+
+    return render_template('staff/payments.html', payments=payments, user=user)
+
+
 
 
 

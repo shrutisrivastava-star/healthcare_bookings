@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Staff - Payments</title>
+</head>
+<body>
+    <h1>Payments for {{ user.hospital.Name }}</h1>
+
+    <table border="1">
+        <tr>
+            <th>Payment ID</th>
+            <th>Booking ID</th>
+            <th>Patient</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+        {% for p in payments %}
+        <tr>
+    <td>{{ p.Payment_ID }}</td>
+    <td>{{ p.Booking_ID }}</td>
+    <td>{{ p.booking.user.Full_Name if p.booking and p.booking.user else 'N/A' }}</td>
+    <td>{{ p.Booking_Type }}</td>
+    <td>₹{{ p.Amount }}</td>
+    <td>{{ p.Payment_Method }}</td>
+    <td>{{ p.Payment_Status }}</td>
+    <td>{{ p.Payment_Date.strftime('%Y-%m-%d %H:%M') if p.Payment_Date else 'N/A' }}</td>
+</tr>
+
+        {% endfor %}
+    </table>
+
+    <a href="{{ url_for('staff_dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

@@ -1,18 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Book Bed</title>
-</head>
-<body>
-    <h2>Select Bed Type</h2>
-    <form method="POST" action="{{ url_for('book_bed_select') }}">
-        <select name="bed_type" required>
-            <option value="">--Select--</option>
-            <option value="ICU">ICU</option>
-            <option value="General">General</option>
-            <option value="Private">Private</option>
-        </select>
-        <button type="submit">Next</button>
-    </form>
-</body>
-</html>
+<h2>Book Bed</h2>
+<form method="POST" action="{{ url_for('book_bed_select') }}">
+  <label>Select Bed Type:</label>
+  <select name="bed_type" required>
+    {% for type in bed_types %}
+    <option value="{{ type }}">{{ type }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Select Date:</label>
+  <input type="date" name="date" required>
+
+  <button type="submit">Search</button>
+</form>

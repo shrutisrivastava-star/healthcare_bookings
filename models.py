@@ -1,24 +1,36 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_login import UserMixin
 
 
 db = SQLAlchemy()
 
 
-class Users(db.Model):
+from flask_login import UserMixin
+
+class Users(db.Model, UserMixin):
     __tablename__ = 'users'
     User_ID = db.Column(db.Integer, primary_key=True)
     Full_Name = db.Column(db.String(50), nullable=False)
-    Email = db.Column(db.String(100), unique=True, nullable=False)
-    Password = db.Column(db.String(255), nullable=False)
-    Phone = db.Column(db.String(20))
+    Street_Address = db.Column(db.String(255))
+    City = db.Column(db.String(100))
+    State = db.Column(db.String(100))
+    Pincode = db.Column(db.String(10))
+    Email = db.Column(db.String(100), nullable=False, unique=True)
+    Phone = db.Column(db.String(20), unique=True)
+    Password = db.Column(db.String(255))
+    Role = db.Column(db.String(20), nullable=False)
     Gender = db.Column(db.String(10))
     DOB = db.Column(db.Date)
-    Role = db.Column(db.String(20), default='patient')
 
     # Link staff users to a hospital (nullable for patients)
     Hospital_ID = db.Column(db.Integer, db.ForeignKey('hospitals.Hospital_ID'), nullable=True)
     hospital = db.relationship("Hospitals", backref="staff")
+
+    # ✅ Add this method for Flask-Login
+    def get_id(self):
+        return str(self.User_ID)
+
 
 
 class Hospitals(db.Model):
@@ -61,9 +73,11 @@ class Bookings(db.Model):
     Booking_date = db.Column(db.Date)
     appointment_date = db.Column(db.Date)
     Status = db.Column(db.String(20))
+
     bed = db.relationship("Beds", backref="bookings", foreign_keys=[Bed_ID])
     vaccine = db.relationship("Vaccines", backref="bookings", foreign_keys=[Vaccine_ID])
     user = db.relationship("Users", backref="bookings", foreign_keys=[User_ID])
+
 
 class Payments(db.Model):
     __tablename__ = 'payments'
@@ -75,6 +89,7 @@ class Payments(db.Model):
     Payment_Method = db.Column(db.String(20))
     Payment_Status = db.Column(db.String(20))
     Payment_Date = db.Column(db.DateTime)
+    booking = db.relationship("Bookings", backref="payments")
 
 
 

@@ -4,7 +4,7 @@
     <title>Payment</title>
 </head>
 <body>
-    <h1>Payment for Booking ID: {{ booking.Booking_ID }}</h1>
+    <h1>Payment for {{ booking.Booking_Type.capitalize() }} Booking ID: {{ booking.Booking_ID }}</h1>
 
     <p><strong>Patient:</strong> {{ user.Full_Name }}</p>
     <p><strong>Amount:</strong> ₹{{ amount }}</p>
@@ -21,6 +21,6 @@
         <button type="submit">Pay Now</button>
     </form>
 
-    <p><a href="{{ url_for('dashboard') }}">Back to Dashboard</a></p>
+    <p><a href="{{ url_for('my_bookings') }}">Back to My Bookings</a></p>
 </body>
 </html>

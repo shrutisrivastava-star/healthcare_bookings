@@ -1,21 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Available Hospitals</title>
-</head>
-<body>
-    <h2>Hospitals with {{ bed_type }} beds available</h2>
-    {% if hospitals %}
-        <ul>
-        {% for hospital in hospitals %}
-            <li>
-                <strong>{{ hospital['Name'] }}</strong>, {{ hospital['City'] }}<br>
-                <a href="{{ url_for('hospital_beds_page', hospital_id=hospital['Hospital_ID'], bed_type=bed_type) }}">View Beds</a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No hospitals available for {{ bed_type }} beds.</p>
-    {% endif %}
-</body>
-</html>
+<h2>Available Beds in {{ bed_type }} on {{ selected_date }}</h2>
+
+{% if beds %}
+  <ul>
+  {% for bed, hospital in beds %}
+    <li>
+      <strong>{{ bed.Bed_Type }}</strong> at {{ hospital.Name }} - Status: {{ bed.Status }}
+      <form method="GET" action="{{ url_for('confirm_bed_booking', bed_id=bed.Bed_ID) }}">
+        <button type="submit">Book</button>
+      </form>
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No available beds found in your city.</p>
+{% endif %}

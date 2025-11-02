@@ -1,9 +1,24 @@
-<h2>Select Vaccine</h2>
-<form method="POST">
-    <select name="vaccine_name">
-        {% for vaccine in vaccines %}
-            <option value="{{ vaccine }}">{{ vaccine }}</option>
-        {% endfor %}
-    </select>
-    <button type="submit">Next</button>
+<h2>Book Vaccine</h2>
+
+<form action="{{ url_for('available_vaccines') }}" method="POST">
+  <label for="vaccine_name">Select Vaccine:</label>
+  <select name="vaccine_name" id="vaccine_name" required>
+    <option value="" disabled selected>Select vaccine</option>
+    {% for name in vaccine_names %}
+      <option value="{{ name }}">{{ name }}</option>
+    {% endfor %}
+  </select>
+
+  <br><br>
+
+  <label for="slot_date">Select Date:</label>
+<input type="date" name="slot_date" id="slot_date" min="{{ current_date }}" required>
+
+  <br><br>
+
+  <button type="submit">Check Availability</button>
 </form>
+
+{% if not vaccine_names %}
+  <p style="color: red;">No vaccines found in the system. Please add vaccines to the database.</p>
+{% endif %}
