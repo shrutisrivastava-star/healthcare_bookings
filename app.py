@@ -104,12 +104,12 @@ def login():
         if user and check_password_hash(user.Password, password):
             session['user_id'] = user.User_ID
             session['role'] = user.Role
-            flash("Login successful!")
+            flash("Login successful!", True)
             if user.Role == 'staff':
                 return redirect(url_for('staff_dashboard'))
             return redirect(url_for('dashboard'))
         else:
-            flash("Invalid credentials!")
+            flash("Invalid credentials!", "error")
     return render_template('login.html')
 
 # ---------- Logout ----------
@@ -409,7 +409,7 @@ def delete_bed(bed_id):
         return redirect(url_for('manage_beds'))
 
     if bed.Status == 'booked':
-        flash("Cannot delete booked beds.")
+        flash("Cannot delete booked beds.", "error")
         return redirect(url_for('manage_beds'))
 
     db.session.delete(bed)
@@ -496,7 +496,7 @@ def delete_vaccine(vaccine_id):
 
     bookings = Bookings.query.filter_by(Vaccine_ID=vaccine_id, Status='confirmed').count()
     if bookings > 0:
-        flash("Cannot delete vaccine slot with active bookings.")
+        flash("Cannot delete vaccine slot with active bookings.", "error")
         return redirect(url_for('manage_vaccines'))
 
     db.session.delete(vaccine)
@@ -540,6 +540,24 @@ def update_bookings(booking_id):
 
     return render_template('staff/update_bookings.html', booking=booking, user=user)
 
+#-------------- Delete Booking --------------
+@app.route('/staff/delete_booking/<int:booking_id>', methods=['POST'], endpoint='delete_booking')
+@login_required
+def delete_booking(booking_id):
+    user = get_logged_in_user()
+    if user.Role != 'staff':
+        flash("Access denied.", "error")
+        return redirect(url_for('dashboard'))
+
+    booking = Bookings.query.get(booking_id)
+    if not booking:
+        flash("Booking not found.", "error")
+        return redirect(url_for('staff_bookings'))
+
+    db.session.delete(booking)
+    db.session.commit()
+    flash("Booking deleted successfully!")
+    return redirect(url_for('staff_bookings'))
 
 #---------------Staff Bookings---------
 @app.route('/staff/bookings')
@@ -559,7 +577,7 @@ def staff_bookings():
         joinedload(Bookings.vaccine),
         joinedload(Bookings.user)  # if you have a relationship to Users
     ).all()
-
+    
     # Filter bookings that belong to this hospital
     booking_details = []
     for b in bookings:
@@ -579,7 +597,68 @@ def staff_bookings():
 
     return render_template('staff/bookings.html', bookings=booking_details)
 
+# ---------- Forgot Password ----------
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Handle forgot password functionality"""
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Basic validation
+        if not email or not new_password or not confirm_password:
+            flash('Please fill in all fields', 'error')
+            return render_template('forgot_password.html')
+        
+        # Check if passwords match
+        if new_password != confirm_password:
+            flash('Passwords do not match', 'error')
+            return render_template('forgot_password.html')
+        
+        # Validate password strength
+        if not is_strong_password(new_password):
+            flash('Password must be at least 8 characters long and contain uppercase, lowercase letters and numbers', 'error')
+            return render_template('forgot_password.html')
+        
+        try:
+            # Check if email exists in database
+            user = Users.query.filter_by(Email=email).first()
+            
+            if not user:
+                flash('No account found with this email address', 'error')
+                return render_template('forgot_password.html')
+            
+            # Update password
+            hashed_password = generate_password_hash(new_password)
+            user.Password = hashed_password
+            
+            # Commit changes to database
+            db.session.commit()
+            
+            flash('Password reset successfully! You can now login with your new password', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error resetting password: {str(e)}")
+            flash('An error occurred while resetting your password. Please try again.', 'danger')
+            return render_template('forgot_password.html')
+    
+    # GET request - show forgot password form
+    return render_template('forgot_password.html')
 
+def is_strong_password(password):
+    """Check if password meets strength requirements"""
+    if len(password) < 8:
+        return False
+    
+    # Check for uppercase, lowercase, and numbers
+    has_upper = any(char.isupper() for char in password)
+    has_lower = any(char.islower() for char in password)
+    has_digit = any(char.isdigit() for char in password)
+    
+    return has_upper and has_lower and has_digit
 
 
 # ------------------ Run ------------------
