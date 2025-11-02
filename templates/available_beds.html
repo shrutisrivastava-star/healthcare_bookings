@@ -1,16 +1,18 @@
 <h2>Available Beds in {{ bed_type }} on {{ selected_date }}</h2>
 
-{% if beds %}
-  <ul>
-  {% for bed, hospital in beds %}
-    <li>
-      <strong>{{ bed.Bed_Type }}</strong> at {{ hospital.Name }} - Status: {{ bed.Status }}
-      <form method="GET" action="{{ url_for('confirm_bed_booking', bed_id=bed.Bed_ID) }}">
-        <button type="submit">Book</button>
-      </form>
-    </li>
+{% if bed_data %}
+  {% for entry in bed_data %}
+    <div class="card" style="margin-bottom: 15px; padding: 10px;">
+      <h4>{{ entry.hospital.Name }}</h4>
+      <p>Bed Type: {{ entry.bed_type }}</p>
+      <p>Available Beds: {{ entry.count }}</p>
+
+      <!-- ✅ GET request to confirmation page -->
+      <a href="{{ url_for('confirm_bed_booking', bed_id=entry.one_bed_id) }}" class="btn btn-primary">
+        Book Now
+      </a>
+    </div>
   {% endfor %}
-  </ul>
 {% else %}
-  <p>No available beds found in your city.</p>
+  <p>No available beds found.</p>
 {% endif %}

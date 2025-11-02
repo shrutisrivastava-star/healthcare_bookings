@@ -241,23 +241,36 @@ def available_beds():
         return redirect(url_for('dashboard'))
 
     if not bed_type:
-        flash("Select a bed type first")
+        flash("Select a bed type first.")
         return redirect(url_for('book_bed_select'))
 
+    # ✅ Clean, simple query – works in all cases
     beds = (
         db.session.query(Beds, Hospitals)
-        .join(Hospitals)
+        .join(Hospitals, Beds.Hospital_ID == Hospitals.Hospital_ID)
         .filter(
-            db.func.lower(Beds.Bed_Type) == bed_type.lower(),
-            db.func.lower(Beds.Status) == 'available',
-            db.func.lower(Hospitals.City) == user.City.lower()
+            Beds.Bed_Type.ilike(bed_type),  # case-insensitive
+            Beds.Status.ilike('available'),
+            Hospitals.City.ilike(user.City)
         )
         .all()
     )
 
+    # ✅ Group beds by hospital manually in Python (avoids SQL issues)
+    grouped_beds = {}
+    for bed, hospital in beds:
+        if hospital.Name not in grouped_beds:
+            grouped_beds[hospital.Name] = {
+                'hospital': hospital,
+                'bed_type': bed.Bed_Type,
+                'count': 0,
+                'one_bed_id': bed.Bed_ID
+            }
+        grouped_beds[hospital.Name]['count'] += 1
+
     return render_template(
         'available_beds.html',
-        beds=beds,
+        bed_data=list(grouped_beds.values()),
         bed_type=bed_type,
         selected_date=selected_date
     )
@@ -269,6 +282,9 @@ def available_beds():
 
 
 
+
+
+# Step 3: Confirm Bed Booking Page (GET)
 # Step 3: Confirm Bed Booking Page (GET)
 @app.route('/book_bed/<int:bed_id>/confirm', methods=['GET'])
 @login_required
@@ -279,6 +295,8 @@ def confirm_bed_booking(bed_id):
     return render_template('confirm_bed_booking.html', bed=bed, hospital=hospital, user=user)
 
 
+
+# Step 4: Confirm & Save Booking (POST)
 # Step 4: Confirm & Save Booking (POST)
 @app.route('/book_bed/<int:bed_id>/confirm', methods=['POST'])
 @login_required
@@ -286,23 +304,34 @@ def confirm_bed_booking_route(bed_id):
     bed = Beds.query.get_or_404(bed_id)
     user = get_logged_in_user()
 
-    # Create a booking but **do not mark it paid yet**
+    # Get selected date from session
+    selected_date_str = session.get('selected_date')
+    try:
+        appointment_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+    except Exception:
+        appointment_date = date.today()
+
+    # Create a booking record
     booking = Bookings(
         User_ID=user.User_ID,
         Bed_ID=bed.Bed_ID,
         Booking_Type='bed',
         Booking_date=date.today(),
-        appointment_date=date.today(),
-        Status='pending'  # pending until payment
+        appointment_date=appointment_date,
+        Status='pending'
     )
     db.session.add(booking)
+
+    # ✅ Mark bed as booked
+    bed.Status = 'booked'
     db.session.commit()
 
-    # Store booking ID in session to pass to payment page
     session['current_booking_id'] = booking.Booking_ID
-    session['amount'] = 5000  # or fetch from bed type / pricing table
+    session['amount'] = 5000  # or dynamic price
 
+    flash("✅ Bed booked successfully. Please proceed to payment.", "success")
     return redirect(url_for('payment_page'))
+
 
 
 # ---------- Vaccine Booking ----------
@@ -863,19 +892,38 @@ def update_bookings(booking_id):
 
     if request.method == 'POST':
         old_status = booking.Status
-        # Update status
-        booking.Status = request.form.get('status')
+        new_status = request.form.get('status')
+        booking.Status = new_status
+
+        # ✅ Update related Bed or Vaccine status
+        if booking.Bed_ID:
+            bed = Beds.query.get(booking.Bed_ID)
+            if bed:
+                if new_status.lower() in ['cancelled', 'completed', 'discharged']:
+                    bed.Status = 'available'
+                elif new_status.lower() in ['confirmed', 'approved', 'booked']:
+                    bed.Status = 'booked'
+
+        elif booking.Vaccine_ID:
+            vaccine = Vaccines.query.get(booking.Vaccine_ID)
+            if vaccine:
+                if new_status.lower() in ['cancelled', 'completed', 'discharged']:
+                    vaccine.Status = 'available'
+                elif new_status.lower() in ['confirmed', 'approved', 'booked']:
+                    vaccine.Status = 'booked'
+
         db.session.commit()
 
-        # Audit log
-        details = f"Status: {old_status} -> {booking.Status}"
+        # Log audit trail
+        details = f"Status: {old_status} -> {new_status}"
         log_audit(user.User_ID, 'bookings', booking.Booking_ID, 'updated', details)
 
-        flash("Booking updated successfully!", "success")
+        flash("✅ Booking and related record updated successfully!", "success")
         return redirect(url_for('staff_bookings'))
 
     # GET request
     return render_template('staff/update_bookings.html', booking=booking, user=user)
+
 
 # Staff view payments
 @app.route('/staff/payments')
