@@ -294,6 +294,7 @@
                 <li><a href="{{ url_for('manage_beds') }}"><i class="fas fa-bed"></i> Manage Beds</a></li>
                 <li><a href="{{ url_for('manage_vaccines') }}"><i class="fas fa-syringe"></i> Manage Vaccines</a></li>
                 <li><a href="{{ url_for('staff_bookings') }}"><i class="fas fa-calendar-check"></i> Manage Bookings</a></li>
+                <li><a href="{{ url_for('staff_payments') }}"><i class="fas fa-calendar-check"></i> View Payments</a></li>
                 <li><a href="{{ url_for('staff_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -361,15 +362,6 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="d-grid gap-3">
-        <a href="{{ url_for('manage_beds') }}" class="btn btn-primary btn-lg">Manage Beds</a>
-        <a href="{{ url_for('manage_vaccines') }}" class="btn btn-success btn-lg">Manage Vaccines</a>
-        <a href="{{ url_for('my_bookings') }}" class="btn btn-warning btn-lg">Manage Bookings</a>
-        <a href="{{ url_for('staff_payments') }}" class="btn btn-secondary btn-lg">View Payments</a> <!-- Added -->
-        <a href="{{ url_for('staff_profile') }}" class="btn btn-info btn-lg text-white">View Profile</a>
-        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg">Logout</a>
-    </div>
 </div>
 
 <!-- Bootstrap JS (optional) -->
