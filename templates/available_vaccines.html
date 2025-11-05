@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vaccine Booking | Healthcare Portal</title>
+    <title>Available Vaccines | Healthcare Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -14,22 +14,18 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
         
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-        
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
             color: #374151;
+            padding: 0;
         }
         
         /* Dashboard Layout */
         .dashboard-container {
             display: flex;
-            height: 100vh;
-            width: 100vw;
+            min-height: 100vh;
+            width: 100%;
         }
         
         /* Sidebar */
@@ -39,8 +35,6 @@
             color: white;
             padding: 30px 0;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            height: 100vh;
-            overflow-y: auto;
         }
         
         .sidebar-header {
@@ -122,7 +116,6 @@
             flex: 1;
             padding: 40px;
             overflow-y: auto;
-            height: 100vh;
         }
         
         .dashboard-header {
@@ -142,215 +135,171 @@
             font-size: 16px;
         }
         
-        .vaccine-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-left: 10px;
-        }
-        
-        /* Hospital Cards */
-        .hospitals-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .hospital-card {
+        /* Results Header */
+        .results-header {
             background: white;
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid #6366f1;
-            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            border-left: 4px solid #10b981;
         }
         
-        .hospital-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-        }
-        
-        .hospital-header {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .hospital-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-            margin-right: 15px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        }
-        
-        .hospital-info {
-            flex: 1;
-        }
-        
-        .hospital-name {
+        .results-header h2 {
             font-weight: 600;
-            font-size: 20px;
-            color: #1f2937;
-            margin-bottom: 5px;
-        }
-        
-        .hospital-location {
-            display: flex;
-            align-items: center;
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        
-        .hospital-location i {
-            margin-right: 8px;
-            font-size: 14px;
-        }
-        
-        /* Vaccine Slots */
-        .slots-container {
-            margin-top: 15px;
-        }
-        
-        .slot-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 8px;
+            font-size: 24px;
             margin-bottom: 10px;
-            transition: all 0.2s ease;
-        }
-        
-        .slot-item:hover {
-            background: #f1f5f9;
-        }
-        
-        .slot-info {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .slot-date {
-            font-weight: 600;
             color: #1f2937;
-            margin-bottom: 4px;
         }
         
-        .slot-availability {
-            font-size: 14px;
+        .results-header p {
             color: #6b7280;
+            font-size: 16px;
         }
         
-        .available {
-            color: #10b981;
-            font-weight: 500;
-        }
-        
-        .limited {
-            color: #f59e0b;
-            font-weight: 500;
-        }
-        
-        .btn-book {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: none;
-            border-radius: 8px;
-            padding: 8px 16px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            min-width: 80px;
-        }
-        
-        .btn-book:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-book:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
+        /* Vaccine Table */
+        .vaccine-table-container {
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
         }
         
-        .empty-icon {
+        .vaccine-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .vaccine-table thead {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .vaccine-table th {
+            padding: 16px 20px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .vaccine-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        
+        .vaccine-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .vaccine-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        .vaccine-table td {
+            padding: 16px 20px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .vaccine-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .hospital-name {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .hospital-city {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .availability-available {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .availability-limited {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        .book-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .book-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+        
+        .book-button i {
+            margin-right: 6px;
+        }
+        
+        /* No Results */
+        .no-results {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .no-results-icon {
             width: 80px;
             height: 80px;
-            border-radius: 50%;
-            background: #f3f4f6;
+            border-radius: 16px;
+            background: rgba(239, 68, 68, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 20px;
+            color: #ef4444;
             font-size: 32px;
-            color: #9ca3af;
         }
         
-        .empty-state h3 {
+        .no-results h3 {
             font-weight: 600;
             font-size: 24px;
-            color: #1f2937;
             margin-bottom: 10px;
+            color: #1f2937;
         }
         
-        .empty-state p {
+        .no-results p {
             color: #6b7280;
-            max-width: 400px;
-            margin: 0 auto 25px;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #6366f1;
-            border-radius: 8px;
-            padding: 10px 20px;
-            color: #6366f1;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-outline:hover {
-            background: #6366f1;
-            color: white;
+            font-size: 16px;
         }
         
         /* Responsive */
-        @media (max-width: 1200px) {
-            .hospitals-grid {
-                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            }
-        }
-        
         @media (max-width: 768px) {
             .dashboard-container {
                 flex-direction: column;
@@ -361,22 +310,12 @@
                 height: auto;
             }
             
-            .hospitals-grid {
-                grid-template-columns: 1fr;
+            .vaccine-table-container {
+                overflow-x: auto;
             }
             
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .slot-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .btn-book {
-                margin-top: 10px;
-                align-self: flex-end;
+            .vaccine-table {
+                min-width: 700px;
             }
         }
     </style>
@@ -388,7 +327,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">
-                        <i class="fas fa-user-md"></i>
+                        <i class="fas fa-user-injured"></i>
                     </div>
                 </div>
                 <h1>Healthcare Portal</h1>
@@ -396,241 +335,92 @@
             </div>
             
             <ul class="nav-links">
-                <li><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="#"><i class="fas fa-hospital"></i> Find Hospitals</a></li>
-                <li><a href="#" class="active"><i class="fas fa-syringe"></i> Book Vaccination</a></li>
-                <li><a href="#"><i class="fas fa-calendar-check"></i> My Appointments</a></li>
-                <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                <li><a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('book_bed_select') }}"><i class="fas fa-bed"></i> Book Bed</a></li>
+                <li><a href="{{ url_for('book_vaccine') }}" class="active"><i class="fas fa-syringe"></i> Book Vaccine</a></li>
+                <li><a href="{{ url_for('my_bookings') }}"><i class="fas fa-calendar-check"></i> My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
         
         <!-- Main Content -->
         <div class="main-content">
             <div class="dashboard-header">
-                <h2>Available Vaccination Centers</h2>
-                <p>Hospitals with <span class="vaccine-badge">COVID-19 Vaccine</span> available</p>
+                <h2>Available Vaccines</h2>
+                <p>Find and book your vaccination appointment</p>
             </div>
             
-            <!-- Hospitals Grid -->
-            <div class="hospitals-grid">
-                <!-- Hospital Card 1 -->
-                <div class="hospital-card">
-                    <div class="hospital-header">
-                        <div class="hospital-icon">
-                            <i class="fas fa-hospital"></i>
-                        </div>
-                        <div class="hospital-info">
-                            <div class="hospital-name">City General Hospital</div>
-                            <div class="hospital-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                123 Medical Drive, New York, NY
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="slots-container">
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Monday, March 15, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="available">24 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                        
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Tuesday, March 16, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="available">18 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                        
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Wednesday, March 17, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="limited">3 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Hospital Card 2 -->
-                <div class="hospital-card">
-                    <div class="hospital-header">
-                        <div class="hospital-icon">
-                            <i class="fas fa-hospital"></i>
-                        </div>
-                        <div class="hospital-info">
-                            <div class="hospital-name">Metropolitan Medical Center</div>
-                            <div class="hospital-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                456 Health Avenue, Brooklyn, NY
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="slots-container">
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Thursday, March 18, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="available">32 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                        
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Friday, March 19, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="available">28 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Hospital Card 3 -->
-                <div class="hospital-card">
-                    <div class="hospital-header">
-                        <div class="hospital-icon">
-                            <i class="fas fa-hospital"></i>
-                        </div>
-                        <div class="hospital-info">
-                            <div class="hospital-name">Unity Health Center</div>
-                            <div class="hospital-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                789 Wellness Street, Queens, NY
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="slots-container">
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Saturday, March 20, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="limited">2 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                        
-                        <div class="slot-item">
-                            <div class="slot-info">
-                                <div class="slot-date">Monday, March 22, 2023</div>
-                                <div class="slot-availability">
-                                    Available: <span class="available">15 slots</span>
-                                </div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-plus"></i> Book
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <!-- Results Header -->
+            <div class="results-header">
+                <h2>Available Vaccine Slots</h2>
+                <p>Select a vaccine and hospital to schedule your appointment</p>
             </div>
             
-            <!-- Empty State (Hidden by default) -->
-            <!--
-            <div class="empty-state">
-                <div class="empty-icon">
+            <!-- Vaccine Table -->
+            {% if vaccines %}
+            <div class="vaccine-table-container">
+                <table class="vaccine-table">
+                    <thead>
+                        <tr>
+                            <th>Vaccine Name</th>
+                            <th>Hospital Name</th>
+                            <th>City</th>
+                            <th>Available</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vaccines %}
+                        <tr>
+                            <td>
+                                <div class="vaccine-name">{{ v.Vaccine_Name }}</div>
+                            </td>
+                            <td>
+                                <div class="hospital-name">{{ v.hospital.Name }}</div>
+                            </td>
+                            <td>
+                                <div class="hospital-city">{{ v.hospital.City }}</div>
+                            </td>
+                            <td>
+                                {% if v.Available > 10 %}
+                                <span class="availability-badge availability-available">
+                                    <i class="fas fa-check-circle"></i>
+                                    {{ v.Available }} slots
+                                </span>
+                                {% else %}
+                                <span class="availability-badge availability-limited">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ v.Available }} slots
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('confirm_vaccine', slot_id=v.Slot_ID) }}" method="get">
+                                    <button type="submit" class="book-button">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        Book Now
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-results">
+                <div class="no-results-icon">
                     <i class="fas fa-syringe"></i>
                 </div>
-                <h3>No Vaccination Centers Available</h3>
-                <p>We couldn't find any hospitals with COVID-19 Vaccine available in your area at the moment.</p>
-                <a href="#" class="btn-outline">
-                    <i class="fas fa-search"></i> Search Again
-                </a>
+                <h3>No Vaccine Slots Available</h3>
+                <p>{{ message }}</p>
+                <p>Please try a different date or check back later for new availability.</p>
             </div>
-            -->
+            {% endif %}
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS (optional) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Function to update the vaccine name in the header
-        function updateVaccineName(vaccineName) {
-            const badge = document.querySelector('.vaccine-badge');
-            badge.textContent = vaccineName;
-            
-            const headerText = document.querySelector('.dashboard-header p');
-            headerText.innerHTML = `Hospitals with <span class="vaccine-badge">${vaccineName}</span> available`;
-        }
-        
-        // Example: Update to show different vaccine types
-        // updateVaccineName('Flu Vaccine');
-        // updateVaccineName('HPV Vaccine');
-        
-        // Add animation to cards on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.hospital-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                
-                setTimeout(() => {
-                    card.style.transition = 'all 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-            
-            // Handle booking clicks
-            const bookButtons = document.querySelectorAll('.btn-book');
-            bookButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const slotItem = this.closest('.slot-item');
-                    const slotDate = slotItem.querySelector('.slot-date').textContent;
-                    const hospitalName = slotItem.closest('.hospital-card').querySelector('.hospital-name').textContent;
-                    
-                    // Show confirmation (in a real app, this would redirect to booking page)
-                    alert(`Booking vaccination at ${hospitalName} for ${slotDate}`);
-                    
-                    // In a real application, this would be:
-                    // window.location.href = `/confirm-vaccine-booking?slot_id=${slotId}`;
-                });
-            });
-        });
-        
-        // Function to filter by date (example implementation)
-        function filterByDate(date) {
-            const slots = document.querySelectorAll('.slot-item');
-            slots.forEach(slot => {
-                const slotDate = slot.querySelector('.slot-date').textContent;
-                if (slotDate.includes(date)) {
-                    slot.style.display = 'flex';
-                } else {
-                    slot.style.display = 'none';
-                }
-            });
-        }
-    </script>
 </body>
 </html>

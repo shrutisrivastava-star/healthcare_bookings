@@ -219,6 +219,7 @@ def book_bed_select():
         return redirect(url_for('available_beds'))
 
     hospitals = Hospitals.query.filter_by(City=user.City).all()
+    beds = Beds.query.all()
     return render_template('book_bed.html', bed_types=bed_types, hospitals=hospitals)
 
 

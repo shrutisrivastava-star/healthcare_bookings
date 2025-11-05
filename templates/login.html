@@ -16,21 +16,19 @@
 
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 40px;
         }
 
-        .login-container {
+        .login-wrapper {
             width: 100%;
-            max-width: 1000px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+            max-width: 1200px;
             display: flex;
-            height: 90vh;
+            gap: 0;
+            height: 700px;
         }
 
         .login-left {
@@ -42,6 +40,8 @@
             flex-direction: column;
             justify-content: center;
             position: relative;
+            border-radius: 20px 0 0 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
         .login-left::before {
@@ -112,11 +112,13 @@
 
         .login-right {
             flex: 1;
-            padding: 70px 50px;
+            padding: 70px 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             background: white;
+            border-radius: 0 20px 20px 0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
         .login-header {
@@ -241,25 +243,27 @@
             margin: 30px 0;
             position: relative;
             color: #6b7280;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 0 10px;
         }
 
-        .divider::before,
-        .divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 45%;
-            height: 1px;
-            background: #e5e7eb;
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
         }
 
         .divider::before {
+            content: '';
+            position: absolute;
             left: 0;
-        }
-
-        .divider::after {
-            right: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e5e7eb;
+            z-index: 1;
         }
 
         .btn-register {
@@ -322,24 +326,31 @@
             text-decoration: underline;
         }
 
+        .btn-icon {
+            margin-right: 8px;
+        }
+
         @media (max-width: 768px) {
-            .login-container {
+            .login-wrapper {
                 flex-direction: column;
                 height: auto;
+                max-width: 400px;
             }
 
             .login-left {
-                display: none;
+                border-radius: 20px 20px 0 0;
+                padding: 40px 30px;
             }
 
             .login-right {
+                border-radius: 0 0 20px 20px;
                 padding: 40px 30px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="login-wrapper">
         <!-- Left Section -->
         <div class="login-left">
             <div class="logo-section">
@@ -412,7 +423,9 @@
                 </button>
             </form>
 
-            <div class="divider">Don't have an account?</div>
+            <div class="divider">
+                <span>Don't have an account?</span>
+            </div>
 
             <!-- Fixed Register Button -->
             <a href="{{ url_for('register') }}" class="btn-register" id="registerBtn">
