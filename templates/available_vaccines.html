@@ -1,29 +1,426 @@
-<h2>Available Vaccine Slots</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Vaccines | Healthcare Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: #374151;
+            padding: 0;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 8px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-header h2 {
+            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1f2937;
+            letter-spacing: -0.5px;
+        }
+        
+        .dashboard-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Results Header */
+        .results-header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .results-header h2 {
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        
+        .results-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Vaccine Table */
+        .vaccine-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .vaccine-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .vaccine-table thead {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .vaccine-table th {
+            padding: 16px 20px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .vaccine-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        
+        .vaccine-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .vaccine-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        .vaccine-table td {
+            padding: 16px 20px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .vaccine-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .hospital-name {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .hospital-city {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .availability-available {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .availability-limited {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        .book-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .book-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+        
+        .book-button i {
+            margin-right: 6px;
+        }
+        
+        /* No Results */
+        .no-results {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .no-results-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            background: rgba(239, 68, 68, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: #ef4444;
+            font-size: 32px;
+        }
+        
+        .no-results h3 {
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        
+        .no-results p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .vaccine-table-container {
+                overflow-x: auto;
+            }
+            
+            .vaccine-table {
+                min-width: 700px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                </div>
+                <h1>Healthcare Portal</h1>
+                <p>Patient Dashboard</p>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('book_bed_select') }}"><i class="fas fa-bed"></i> Book Bed</a></li>
+                <li><a href="{{ url_for('book_vaccine') }}" class="active"><i class="fas fa-syringe"></i> Book Vaccine</a></li>
+                <li><a href="{{ url_for('my_bookings') }}"><i class="fas fa-calendar-check"></i> My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h2>Available Vaccines</h2>
+                <p>Find and book your vaccination appointment</p>
+            </div>
+            
+            <!-- Results Header -->
+            <div class="results-header">
+                <h2>Available Vaccine Slots</h2>
+                <p>Select a vaccine and hospital to schedule your appointment</p>
+            </div>
+            
+            <!-- Vaccine Table -->
+            {% if vaccines %}
+            <div class="vaccine-table-container">
+                <table class="vaccine-table">
+                    <thead>
+                        <tr>
+                            <th>Vaccine Name</th>
+                            <th>Hospital Name</th>
+                            <th>City</th>
+                            <th>Available</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vaccines %}
+                        <tr>
+                            <td>
+                                <div class="vaccine-name">{{ v.Vaccine_Name }}</div>
+                            </td>
+                            <td>
+                                <div class="hospital-name">{{ v.hospital.Name }}</div>
+                            </td>
+                            <td>
+                                <div class="hospital-city">{{ v.hospital.City }}</div>
+                            </td>
+                            <td>
+                                {% if v.Available > 10 %}
+                                <span class="availability-badge availability-available">
+                                    <i class="fas fa-check-circle"></i>
+                                    {{ v.Available }} slots
+                                </span>
+                                {% else %}
+                                <span class="availability-badge availability-limited">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ v.Available }} slots
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('confirm_vaccine', slot_id=v.Slot_ID) }}" method="get">
+                                    <button type="submit" class="book-button">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        Book Now
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-results">
+                <div class="no-results-icon">
+                    <i class="fas fa-syringe"></i>
+                </div>
+                <h3>No Vaccine Slots Available</h3>
+                <p>{{ message }}</p>
+                <p>Please try a different date or check back later for new availability.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-{% if vaccines %}
-<table border="1">
-  <tr>
-    <th>Vaccine Name</th>
-    <th>Hospital Name</th>
-    <th>Slot Date</th>
-    <th>Available</th>
-    <th>Action</th>
-  </tr>
-  {% for v in vaccines %}
-<tr>
-  <td>{{ v.Vaccine_Name }}</td>
-  <td>{{ v.hospital.Name }}</td>
-  <td>{{ v.hospital.City }}</td>
-  <td>{{ v.Available }}</td>
-  <td>
-      <form action="{{ url_for('confirm_vaccine', slot_id=v.Slot_ID) }}" method="get">
-          <button type="submit" class="btn btn-primary">Book Now</button>
-      </form>
-  </td>
-</tr>
-{% endfor %}
-
-</table>
-{% else %}
-<p>{{ message }}</p>
-{% endif %}
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

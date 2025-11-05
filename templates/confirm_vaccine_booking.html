@@ -1,13 +1,471 @@
-<h2>Confirm Vaccine Booking</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Vaccine Booking | Healthcare Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 8px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-header h2 {
+            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1f2937;
+            letter-spacing: -0.5px;
+        }
+        
+        .dashboard-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Confirmation Card */
+        .confirmation-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 4px solid #10b981;
+            transition: transform 0.3s ease;
+        }
+        
+        .confirmation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        }
+        
+        .confirmation-card h2 {
+            font-weight: 600;
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: #1f2937;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .confirmation-card h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 2px;
+        }
+        
+        /* Booking Details */
+        .booking-details {
+            background: #f0fdf4;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #dcfce7;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-label i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            color: #10b981;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .availability-high {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .availability-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn-success {
+            flex: 1;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+        
+        .btn-outline {
+            flex: 1;
+            padding: 16px;
+            background: white;
+            color: #10b981;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-outline:hover {
+            background: #10b981;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Important Notice */
+        .important-notice {
+            background: #fff7ed;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 25px;
+        }
+        
+        .important-notice h4 {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #92400e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .important-notice h4 i {
+            margin-right: 10px;
+        }
+        
+        .important-notice p {
+            color: #92400e;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        /* Vaccine Icon */
+        .vaccine-icon {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .vaccine-icon i {
+            font-size: 48px;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                padding: 25px 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                </div>
+                <h1>Healthcare Portal</h1>
+                <p>Patient Dashboard</p>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('book_bed_select') }}"><i class="fas fa-bed"></i> Book Bed</a></li>
+                <li><a href="{{ url_for('book_vaccine') }}" class="active"><i class="fas fa-syringe"></i> Book Vaccine</a></li>
+                <li><a href="{{ url_for('my_bookings') }}"><i class="fas fa-calendar-check"></i> My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h2>Confirm Your Vaccine Booking</h2>
+                <p>Review your vaccination appointment details before confirmation</p>
+            </div>
+            
+            <div class="confirmation-card">
+                <div class="vaccine-icon">
+                    <i class="fas fa-syringe"></i>
+                </div>
+                <h2>Confirm Vaccine Booking</h2>
+                
+                <!-- Booking Details -->
+                <div class="booking-details">
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-syringe"></i>
+                            Vaccine
+                        </span>
+                        <span class="detail-value">{{ slot.Vaccine_Name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-hospital"></i>
+                            Hospital
+                        </span>
+                        <span class="detail-value">{{ slot.hospital.Name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-calendar-day"></i>
+                            Date
+                        </span>
+                        <span class="detail-value">{{ appointment_date }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-clock"></i>
+                            Time
+                        </span>
+                        <span class="detail-value">{{ slot.Slot_Time }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-calendar-check"></i>
+                            Available Slots
+                        </span>
+                        <span class="detail-value">
+                            <span class="availability-badge {% if slot.Available > 5 %}availability-high{% else %}availability-medium{% endif %}">
+                                <i class="fas fa-{% if slot.Available > 5 %}check{% else %}exclamation{% endif %}-circle me-1"></i>
+                                {{ slot.Available }} slots
+                            </span>
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <form method="POST" action="{{ url_for('book_vaccine_final', slot_id=slot.Slot_ID) }}" style="flex: 1;">
+                        <input type="hidden" name="appointment_date" value="{{ session['selected_date'] }}">
+                        <button type="submit" class="btn-success">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Confirm & Pay
+                        </button>
+                    </form>
+                    
+                    <a href="{{ url_for('available_vaccines') }}" class="btn-outline">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Available Vaccines
+                    </a>
+                </div>
+                
+                <!-- Important Notice -->
+                <div class="important-notice">
+                    <h4>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Important Notice
+                    </h4>
+                    <p>By confirming this booking, you agree to our terms and conditions. Please arrive 15 minutes before your scheduled appointment time.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p><strong>Vaccine:</strong> {{ slot.Vaccine_Name }}</p>
-<p><strong>Hospital:</strong> {{ slot.hospital.Name }}</p>
-<p><strong>Date:</strong> {{appointment_date }}</p>
-<p><strong>Time:</strong> {{ slot.Slot_Time }}</p>
-<p><strong>Available Slots:</strong> {{ slot.Available }}</p>
-
-<form method="POST" action="{{ url_for('book_vaccine_final', slot_id=slot.Slot_ID) }}">
-  <input type="hidden" name="appointment_date" value="{{ session['selected_date'] }}">
-  <button type="submit">Confirm & Pay</button>
-</form>
-
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
