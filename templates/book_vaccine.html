@@ -1,24 +1,417 @@
-<h2>Book Vaccine</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccine Booking System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #2c7fb8;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .booking-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+        
+        .form-title {
+            color: #2c7fb8;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #444;
+            font-size: 1.1rem;
+        }
+        
+        .select-wrapper, .date-wrapper {
+            position: relative;
+        }
+        
+        select, input[type="date"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: white;
+            appearance: none;
+        }
+        
+        select:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #2c7fb8;
+            box-shadow: 0 0 0 3px rgba(44, 127, 184, 0.2);
+        }
+        
+        .select-wrapper::after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            pointer-events: none;
+        }
+        
+        .date-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .date-info i {
+            margin-right: 8px;
+            color: #2c7fb8;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #2c7fb8 0%, #1d5a82 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 16px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(44, 127, 184, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .submit-btn i {
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .submit-btn:hover i {
+            transform: translateX(5px);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #2c7fb8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: center;
+            border-left: 4px solid #e74c3c;
+            display: none;
+        }
+        
+        .vaccine-info {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            display: none;
+            border-left: 4px solid #2c7fb8;
+        }
+        
+        .vaccine-icon {
+            margin-right: 15px;
+            color: #2c7fb8;
+            font-size: 1.2rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .form-column {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .booking-card {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vaccine Booking System</h1>
+            <p>Schedule your vaccination appointment quickly and safely</p>
+        </div>
+        
+        <div class="booking-card">
+            <h2 class="form-title">Book Your Vaccine</h2>
+            
+            <form id="vaccineForm" action="{{ url_for('available_vaccines') }}" method="POST">
+                <div class="form-row">
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="vaccine_name">
+                                <i class="fas fa-syringe"></i> Select Vaccine
+                            </label>
+                            <div class="select-wrapper">
+                                <select name="vaccine_name" id="vaccine_name" required>
+                                    <option value="" disabled selected>Choose a vaccine</option>
+                                    <option value="Pfizer-BioNTech">Pfizer-BioNTech</option>
+                                    <option value="Moderna">Moderna</option>
+                                    <option value="Johnson & Johnson">Johnson & Johnson</option>
+                                    <option value="AstraZeneca">AstraZeneca</option>
+                                    <option value="Sinovac">Sinovac</option>
+                                </select>
+                            </div>
+                            
+                            <div class="vaccine-info" id="vaccineDetails">
+                                <div class="vaccine-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div id="vaccineDescription">
+                                    Vaccine information will appear here after selection
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="slot_date">
+                                <i class="far fa-calendar-alt"></i> Select Date
+                            </label>
+                            <div class="date-wrapper">
+                                <input type="date" name="slot_date" id="slot_date" required>
+                            </div>
+                            <div class="date-info">
+                                <i class="far fa-clock"></i>
+                                <span>Earliest available date: <span id="currentDate"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<form action="{{ url_for('available_vaccines') }}" method="POST">
-  <label for="vaccine_name">Select Vaccine:</label>
-  <select name="vaccine_name" id="vaccine_name" required>
-    <option value="" disabled selected>Select vaccine</option>
-    {% for name in vaccine_names %}
-      <option value="{{ name }}">{{ name }}</option>
-    {% endfor %}
-  </select>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Check Availability
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>Checking vaccine availability for your selected date...</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-triangle"></i>
+                No vaccines found in the system. Please add vaccines to the database.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 Healthcare System. All rights reserved.</p>
+        </div>
+    </div>
 
-  <br><br>
-
-  <label for="slot_date">Select Date:</label>
-<input type="date" name="slot_date" id="slot_date" min="{{ current_date }}" required>
-
-  <br><br>
-
-  <button type="submit">Check Availability</button>
-</form>
-
-{% if not vaccine_names %}
-  <p style="color: red;">No vaccines found in the system. Please add vaccines to the database.</p>
-{% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const vaccineForm = document.getElementById('vaccineForm');
+            const vaccineSelect = document.getElementById('vaccine_name');
+            const dateInput = document.getElementById('slot_date');
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const vaccineDetails = document.getElementById('vaccineDetails');
+            const vaccineDescription = document.getElementById('vaccineDescription');
+            const errorMessage = document.getElementById('errorMessage');
+            const currentDateElement = document.getElementById('currentDate');
+            
+            // Set current date
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            dateInput.min = formattedDate;
+            currentDateElement.textContent = formattedDate;
+            
+            // Vaccine information
+            const vaccineInfo = {
+                "Pfizer-BioNTech": "mRNA vaccine, 2 doses recommended 3 weeks apart. Over 90% effective against COVID-19.",
+                "Moderna": "mRNA vaccine, 2 doses recommended 4 weeks apart. Over 94% effective against COVID-19.",
+                "Johnson & Johnson": "Viral vector vaccine, single dose. 66% effective overall against COVID-19.",
+                "AstraZeneca": "Viral vector vaccine, 2 doses recommended 4-12 weeks apart. Around 70% effective.",
+                "Sinovac": "Inactivated vaccine, 2 doses recommended 2-4 weeks apart. Widely used globally."
+            };
+            
+            // Show vaccine details when a vaccine is selected
+            vaccineSelect.addEventListener('change', function() {
+                const selectedVaccine = this.value;
+                if (selectedVaccine && vaccineInfo[selectedVaccine]) {
+                    vaccineDescription.textContent = vaccineInfo[selectedVaccine];
+                    vaccineDetails.style.display = 'flex';
+                } else {
+                    vaccineDetails.style.display = 'none';
+                }
+            });
+            
+            // Form submission with loading state
+            vaccineForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = "Checking Availability <i class='fas fa-spinner fa-spin'></i>";
+                loadingIndicator.style.display = 'block';
+                
+                // Simulate API call delay
+                setTimeout(function() {
+                    // Hide loading state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = "Check Availability <i class='fas fa-arrow-right'></i>";
+                    loadingIndicator.style.display = 'none';
+                    
+                    // In a real implementation, we would redirect or show results here
+                    const formData = new FormData(vaccineForm);
+                    console.log('Vaccine:', formData.get('vaccine_name'));
+                    console.log('Date:', formData.get('slot_date'));
+                    
+                    // Show a subtle confirmation
+                    submitBtn.innerHTML = "Availability Checked <i class='fas fa-check'></i>";
+                    submitBtn.style.background = "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)";
+                    
+                    setTimeout(function() {
+                        submitBtn.innerHTML = "Check Availability <i class='fas fa-arrow-right'></i>";
+                        submitBtn.style.background = "linear-gradient(135deg, #2c7fb8 0%, #1d5a82 100%)";
+                    }, 2000);
+                }, 2000);
+            });
+            
+            // Date validation
+            dateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (selectedDate < today) {
+                    this.setCustomValidity('Please select a date from today onwards');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Simulate no vaccines scenario (for demonstration)
+            // In a real application, this would be controlled by the backend
+            const simulateNoVaccines = false; // Change to true to see error message
+            
+            if (simulateNoVaccines) {
+                vaccineSelect.disabled = true;
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

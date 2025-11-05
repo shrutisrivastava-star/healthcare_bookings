@@ -1,37 +1,513 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings | Healthcare Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: #374151;
+            padding: 0;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 8px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-header h2 {
+            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1f2937;
+            letter-spacing: -0.5px;
+        }
+        
+        .dashboard-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Top Navigation Buttons */
+        .top-navigation {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #6b7280;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+            color: white;
+        }
+        
+        .nav-button.secondary {
+            background: #6b7280;
+        }
+        
+        .nav-button.logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .nav-button.logout-btn:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        /* Bookings Section */
+        .bookings-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .bookings-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bookings-header h3 {
+            font-weight: 600;
+            font-size: 22px;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .bookings-count {
+            background: #6366f1;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .bookings-table th {
+            background: #f8fafc;
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .bookings-table td {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
+        }
+        
+        .bookings-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .bookings-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .booking-type {
+            display: flex;
+            align-items: center;
+        }
+        
+        .type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .type-bed {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .type-vaccine {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-completed {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .no-bookings {
+            padding: 60px 30px;
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        .no-bookings-icon {
+            font-size: 64px;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+        
+        .no-bookings h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #4b5563;
+        }
+        
+        .no-bookings p {
+            margin-bottom: 25px;
+        }
+        
+        .action-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+        
+        .action-button.secondary {
+            background: #6b7280;
+        }
+        
+        .action-button.secondary:hover {
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .bookings-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .top-navigation {
+                flex-direction: column;
+            }
+            
+            .nav-button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .bookings-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                </div>
+                <h1>Healthcare Portal</h1>
+                <p>Patient Dashboard</p>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('book_bed_select') }}"><i class="fas fa-bed"></i> Book Bed</a></li>
+                <li><a href="{{ url_for('book_vaccine') }}"><i class="fas fa-syringe"></i> Book Vaccine</a></li>
+                <li><a href="{{ url_for('my_bookings') }}" class="active"><i class="fas fa-calendar-check"></i> My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Navigation Buttons -->
+            <div class="top-navigation">
+                <a href="{{ url_for('dashboard') }}" class="nav-button secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-button logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
 
-{% block content %}
-<h2>My Bookings</h2>
+            <div class="dashboard-header">
+                <h2>My Bookings</h2>
+                <p>View and manage your appointments and reservations</p>
+            </div>
+            
+            <!-- Bookings Section -->
+            <div class="bookings-container">
+                <div class="bookings-header">
+                    <h3>Your Bookings</h3>
+                    <div class="bookings-count">{{ bookings|length }} Booking{% if bookings|length != 1 %}s{% endif %}</div>
+                </div>
+                
+                {% if bookings %}
+                <table class="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Type</th>
+                            <th>Hospital</th>
+                            <th>Status</th>
+                            <th>Appointment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td><strong>#{{ booking.Booking_ID }}</strong></td>
+                            <td>
+                                <div class="booking-type">
+                                    {% if booking.Type == 'Bed' %}
+                                    <div class="type-icon type-bed">
+                                        <i class="fas fa-bed"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="type-icon type-vaccine">
+                                        <i class="fas fa-syringe"></i>
+                                    </div>
+                                    {% endif %}
+                                    {{ booking.Type }}
+                                </div>
+                            </td>
+                            <td>{{ booking.Hospital_Name }}</td>
+                            <td>
+                                {% if booking.Status == 'Confirmed' %}
+                                <span class="status-badge status-confirmed">{{ booking.Status }}</span>
+                                {% elif booking.Status == 'Pending' %}
+                                <span class="status-badge status-pending">{{ booking.Status }}</span>
+                                {% elif booking.Status == 'Completed' %}
+                                <span class="status-badge status-completed">{{ booking.Status }}</span>
+                                {% else %}
+                                <span class="status-badge status-cancelled">{{ booking.Status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ booking.Appointment_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-bookings">
+                    <div class="no-bookings-icon">
+                        <i class="far fa-calendar-times"></i>
+                    </div>
+                    <h3>No Bookings Yet</h3>
+                    <p>You haven't made any bookings yet. Start by booking a bed or vaccine.</p>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('book_bed_select') }}" class="action-button">Book a Bed</a>
+                        <a href="{{ url_for('book_vaccine') }}" class="action-button">Book a Vaccine</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-{% if bookings %}
-<table border="1" cellpadding="10" cellspacing="0">
-    <tr>
-        <th>Booking ID</th>
-        <th>Type</th>
-        <th>Hospital</th>
-        <th>Status</th>
-        <th>Appointment Date</th>
-    </tr>
-    {% for booking in bookings %}
-    <tr>
-        <td>{{ booking.Booking_ID }}</td>
-        <td>{{ booking.Type }}</td>
-        <td>{{ booking.Hospital_Name }}</td>
-        <td>{{ booking.Status }}</td>
-        <td>{{ booking.Appointment_date }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>You have no bookings yet.</p>
-{% endif %}
-
-<!-- Navigation buttons -->
-<div style="margin-top: 20px;">
-    <a href="{{ url_for('dashboard') }}" 
-       style="padding: 8px 15px; background: #007bff; color: white; border-radius: 5px; text-decoration: none;">Back to Dashboard</a>
-    <a href="{{ url_for('logout') }}" 
-       style="padding: 8px 15px; background: #dc3545; color: white; border-radius: 5px; text-decoration: none; margin-left: 10px;">Logout</a>
-</div>
-
-{% endblock %}
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

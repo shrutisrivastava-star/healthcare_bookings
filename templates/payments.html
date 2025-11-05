@@ -1,26 +1,731 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Payment</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | Healthcare Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #374151;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 8px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+        
+        .dashboard-header h2 {
+            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1f2937;
+            letter-spacing: -0.5px;
+        }
+        
+        .dashboard-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        /* Payment Container */
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .payment-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .payment-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 40px;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .payment-title {
+            font-weight: 700;
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+        
+        .payment-subtitle {
+            color: #6b7280;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        /* Booking Summary */
+        .booking-summary {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .summary-header {
+            font-weight: 600;
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-header i {
+            color: #6366f1;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .summary-value {
+            font-size: 16px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        /* Payment Methods */
+        .payment-methods {
+            margin: 30px 0;
+        }
+        
+        .methods-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .methods-title i {
+            color: #6366f1;
+        }
+        
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .method-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .method-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
+        }
+        
+        .method-card.selected {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        .method-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .method-card.upi .method-icon {
+            background: linear-gradient(135deg, #6a1b9a, #8e24aa);
+        }
+        
+        .method-card.credit .method-icon {
+            background: linear-gradient(135deg, #ff6f00, #ff8f00);
+        }
+        
+        .method-card.debit .method-icon {
+            background: linear-gradient(135deg, #0277bd, #0288d1);
+        }
+        
+        .method-card.netbanking .method-icon {
+            background: linear-gradient(135deg, #2e7d32, #388e3c);
+        }
+        
+        .method-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .method-desc {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .selected-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Amount Section */
+        .amount-section {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .amount-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .amount-value {
+            font-weight: 700;
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        
+        .amount-note {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .btn-pay {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 200px;
+        }
+        
+        .btn-pay:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-back {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px 40px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 200px;
+        }
+        
+        .btn-back:hover {
+            background: white;
+            border-color: #6366f1;
+            color: #6366f1;
+            transform: translateY(-3px);
+        }
+        
+        /* Security Notice */
+        .security-notice {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+        }
+        
+        .security-notice i {
+            color: #10b981;
+            font-size: 18px;
+            margin-right: 8px;
+        }
+        
+        .security-text {
+            color: #166534;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .payment-card {
+                padding: 25px;
+            }
+            
+            .methods-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-pay, .btn-back {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Payment for {{ booking.Booking_Type.capitalize() }} Booking ID: {{ booking.Booking_ID }}</h1>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+                <h1>Healthcare Portal</h1>
+                <p>Patient Dashboard</p>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-bed"></i> Book Beds</a></li>
+                <li><a href="#"><i class="fas fa-syringe"></i> Book Vaccination</a></li>
+                <li><a href="#"><i class="fas fa-calendar-check"></i> My Bookings</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h2>Complete Payment</h2>
+                <p>Secure payment for your healthcare booking</p>
+            </div>
+            
+            <div class="payment-container">
+                <form method="POST" class="payment-card">
+                    <div class="payment-header">
+                        <div class="payment-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h3 class="payment-title">Payment Required</h3>
+                        <p class="payment-subtitle">Complete your payment to confirm the booking</p>
+                    </div>
+                    
+                    <!-- Booking Summary -->
+                    <div class="booking-summary">
+                        <div class="summary-header">
+                            <i class="fas fa-receipt"></i>
+                            Booking Summary
+                        </div>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="summary-label">Booking ID</span>
+                                <span class="summary-value">#BK-2024-015</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Patient Name</span>
+                                <span class="summary-value">Sarah Johnson</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Service Type</span>
+                                <span class="summary-value">ICU Bed Booking</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Hospital</span>
+                                <span class="summary-value">City General Hospital</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Methods -->
+                    <div class="payment-methods">
+                        <div class="methods-title">
+                            <i class="fas fa-wallet"></i>
+                            Select Payment Method
+                        </div>
+                        
+                        <!-- Hidden input for selected method -->
+                        <input type="hidden" name="payment_method" id="selectedMethod" value="UPI" required>
+                        
+                        <div class="methods-grid">
+                            <!-- UPI Method -->
+                            <div class="method-card upi selected" data-method="UPI">
+                                <div class="selected-badge">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="method-icon">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <div class="method-name">UPI</div>
+                                <div class="method-desc">Instant Payment</div>
+                            </div>
+                            
+                            <!-- Credit Card Method -->
+                            <div class="method-card credit" data-method="Credit Card">
+                                <div class="method-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="method-name">Credit Card</div>
+                                <div class="method-desc">Visa, Mastercard</div>
+                            </div>
+                            
+                            <!-- Debit Card Method -->
+                            <div class="method-card debit" data-method="Debit Card">
+                                <div class="method-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="method-name">Debit Card</div>
+                                <div class="method-desc">Visa, Mastercard</div>
+                            </div>
+                            
+                            <!-- Net Banking Method -->
+                            <div class="method-card netbanking" data-method="Net Banking">
+                                <div class="method-icon">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="method-name">Net Banking</div>
+                                <div class="method-desc">All Major Banks</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Amount Section -->
+                    <div class="amount-section">
+                        <div class="amount-label">Total Amount to Pay</div>
+                        <div class="amount-value">₹1,000</div>
+                        <div class="amount-note">Inclusive of all taxes and charges</div>
+                    </div>
+                    
+                    <!-- Security Notice -->
+                    <div class="security-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <span class="security-text">Your payment is secure and encrypted</span>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="#" class="btn-back">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn-pay">
+                            <i class="fas fa-lock"></i> Pay ₹1,000
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    <p><strong>Patient:</strong> {{ user.Full_Name }}</p>
-    <p><strong>Amount:</strong> ₹{{ amount }}</p>
-
-    <form method="POST">
-        <label>Payment Method:</label><br>
-        <select name="payment_method" required>
-            <option value="UPI">UPI</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="Debit Card">Debit Card</option>
-            <option value="Net Banking">Net Banking</option>
-        </select><br><br>
-
-        <button type="submit">Pay Now</button>
-    </form>
-
-    <p><a href="{{ url_for('my_bookings') }}">Back to My Bookings</a></p>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const methodCards = document.querySelectorAll('.method-card');
+            const selectedMethodInput = document.getElementById('selectedMethod');
+            let selectedMethod = 'UPI';
+            
+            // Handle payment method selection
+            methodCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const method = this.getAttribute('data-method');
+                    
+                    // Remove selected class from all cards
+                    methodCards.forEach(c => {
+                        c.classList.remove('selected');
+                        const badge = c.querySelector('.selected-badge');
+                        if (badge) badge.remove();
+                    });
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                    
+                    // Add selected badge
+                    const badge = document.createElement('div');
+                    badge.className = 'selected-badge';
+                    badge.innerHTML = '<i class="fas fa-check"></i>';
+                    this.appendChild(badge);
+                    
+                    // Update selected method
+                    selectedMethod = method;
+                    selectedMethodInput.value = method;
+                    
+                    // Add selection animation
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+            
+            // Handle form submission
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const payButton = this.querySelector('.btn-pay');
+                const originalText = payButton.innerHTML;
+                
+                // Show loading state
+                payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Payment...';
+                payButton.disabled = true;
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    alert(`Payment of ₹1,000 completed successfully using ${selectedMethod}!`);
+                    // In real application, form would submit normally
+                    // this.submit();
+                }, 2000);
+            });
+            
+            // Add entrance animations
+            const paymentCard = document.querySelector('.payment-card');
+            paymentCard.style.opacity = '0';
+            paymentCard.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                paymentCard.style.transition = 'all 0.6s ease';
+                paymentCard.style.opacity = '1';
+                paymentCard.style.transform = 'translateY(0)';
+            }, 200);
+            
+            // Add staggered animation for method cards
+            methodCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateX(0)';
+                }, 400 + (index * 100));
+            });
+        });
+    </script>
 </body>
 </html>
