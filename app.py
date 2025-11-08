@@ -7,6 +7,8 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy.orm import joinedload
 from flask_login import current_user,login_required,login_user, logout_user, LoginManager
+from flask import jsonify
+from sqlalchemy import func, extract
 
 load_dotenv()
 
@@ -110,13 +112,13 @@ def register():
             Pincode=pincode
         )
 
-        # Add to DB and commit
+
         db.session.add(new_user)
         db.session.commit()
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('login'))
 
-    # GET request or failed POST renders registration page
+
     return render_template('register.html', hospitals=hospitals)
 
 
@@ -130,10 +132,10 @@ def login():
         password = request.form.get('password')
         user = Users.query.filter_by(Email=email).first()
         if user and check_password_hash(user.Password, password):
-            # Mark user as logged in for Flask-Login
+
             login_user(user)
 
-            # Optionally keep your session values if you use them elsewhere
+
             session['user_id'] = user.User_ID
             session['role'] = user.Role
 
@@ -211,7 +213,7 @@ def book_bed_select():
         try:
             selected_date = datetime.strptime(session['selected_date'], "%Y-%m-%d").date()
             if selected_date < date.today():
-                flash("⚠️ Please select a valid (future) date — past dates are not allowed.", "warning")
+                flash(" Please select a valid (future) date — past dates are not allowed.", "warning")
                 return redirect(url_for('book_bed_select'))
         except Exception as e:
             flash("Invalid date format. Please select a valid date.", "danger")
@@ -245,7 +247,7 @@ def available_beds():
         flash("Select a bed type first.")
         return redirect(url_for('book_bed_select'))
 
-    # ✅ Clean, simple query – works in all cases
+
     beds = (
         db.session.query(Beds, Hospitals)
         .join(Hospitals, Beds.Hospital_ID == Hospitals.Hospital_ID)
@@ -257,7 +259,8 @@ def available_beds():
         .all()
     )
 
-    # ✅ Group beds by hospital manually in Python (avoids SQL issues)
+
+
     grouped_beds = {}
     for bed, hospital in beds:
         if hospital.Name not in grouped_beds:
@@ -285,7 +288,7 @@ def available_beds():
 
 
 
-# Step 3: Confirm Bed Booking Page (GET)
+
 # Step 3: Confirm Bed Booking Page (GET)
 @app.route('/book_bed/<int:bed_id>/confirm', methods=['GET'])
 @login_required
@@ -296,8 +299,6 @@ def confirm_bed_booking(bed_id):
     return render_template('confirm_bed_booking.html', bed=bed, hospital=hospital, user=user)
 
 
-
-# Step 4: Confirm & Save Booking (POST)
 # Step 4: Confirm & Save Booking (POST)
 @app.route('/book_bed/<int:bed_id>/confirm', methods=['POST'])
 @login_required
@@ -323,14 +324,14 @@ def confirm_bed_booking_route(bed_id):
     )
     db.session.add(booking)
 
-    # ✅ Mark bed as booked
+
     bed.Status = 'booked'
     db.session.commit()
 
     session['current_booking_id'] = booking.Booking_ID
     session['amount'] = 5000  # or dynamic price
 
-    flash("✅ Bed booked successfully. Please proceed to payment.", "success")
+    flash("Bed booked successfully. Please proceed to payment.", "success")
     return redirect(url_for('payment_page'))
 
 
@@ -345,10 +346,7 @@ def book_vaccine():
         from datetime import datetime
         slot_date = datetime.strptime(slot_date_str, '%Y-%m-%d').date()
 
-        # Find vaccines where:
-        # 1️⃣ Vaccine name matches (case-insensitive)
-        # 2️⃣ Slot date is BEFORE OR EQUAL TO selected date
-        # 3️⃣ Available > 0
+
         vaccines = Vaccines.query.filter(
             db.func.lower(Vaccines.Vaccine_Name) == vaccine_name.lower(),
             Vaccines.Slot_Date <= slot_date,
@@ -359,7 +357,7 @@ def book_vaccine():
             flash(f"No available slots found for {vaccine_name} before or on {slot_date}.")
             return render_template('available_vaccine.html', vaccines=[])
 
-        # ✅ Show available slots (with hospital details)
+
         return render_template('available_vaccine.html', vaccines=vaccines)
 
     # GET request — show vaccine name dropdown
@@ -386,40 +384,40 @@ def available_vaccines():
     vaccine_name = request.form.get('vaccine_name')
     slot_date_str = request.form.get('slot_date')
 
-    print("\n🧠 --- DEBUG: Vaccine Availability Check ---")
+    print("\n --- DEBUG: Vaccine Availability Check ---")
     print("Raw form data:", vaccine_name, slot_date_str)
 
-    # 🧩 Parse date safely
+
     try:
         if "-" in slot_date_str and len(slot_date_str.split("-")[0]) == 4:
             slot_date = datetime.strptime(slot_date_str, "%Y-%m-%d").date()
         else:
             slot_date = datetime.strptime(slot_date_str, "%d-%m-%Y").date()
     except Exception as e:
-        flash("❌ Invalid date format. Please use YYYY-MM-DD or DD-MM-YYYY.", "danger")
-        print("❌ Date parsing failed:", e)
+        flash(" Invalid date format. Please use YYYY-MM-DD or DD-MM-YYYY.", "danger")
+        print(" Date parsing failed:", e)
         return redirect(url_for('book_vaccine'))
 
-    print("✅ Parsed slot_date:", slot_date)
+    print("Parsed slot_date:", slot_date)
     session['selected_date'] = slot_date.strftime("%Y-%m-%d")
 
-    # 🚫 If date is in the past
+
     if slot_date < date.today():
-        flash("⚠️ Please enter a valid (future) date — past dates are not allowed.", "warning")
+        flash(" Please enter a valid (future) date — past dates are not allowed.", "warning")
         return redirect(url_for('book_vaccine'))
 
-    # 👤 Get user city
+
     user = get_logged_in_user()
     user_city = user.City.strip().lower() if user.City else None
-    print(f"🏙️ Filtering by user city: {user_city}")
+    print(f" Filtering by user city: {user_city}")
 
-    # 🧠 Debug: show all vaccines
+
     all_vaccines = db.session.query(Vaccines).join(Hospitals, Vaccines.Hospital_ID == Hospitals.Hospital_ID).all()
-    print("\n📋 DEBUG: Showing all vaccines in DB for reference:")
+    print("\n DEBUG: Showing all vaccines in DB for reference:")
     for v in all_vaccines:
         print(f"   -> ID:{v.Slot_ID}, Name:{v.Vaccine_Name}, Date:{v.Slot_Date}, City:{v.hospital.City}, Avail:{v.Available}")
 
-    # ✅ Query: same city, same vaccine, available > 0
+
     vaccines = (
         db.session.query(Vaccines)
         .join(Hospitals, Vaccines.Hospital_ID == Hospitals.Hospital_ID)
@@ -431,8 +429,8 @@ def available_vaccines():
         .all()
     )
 
-    print(f"\n🔍 Querying for vaccine='{vaccine_name.lower()}', city={user_city}, future date OK")
-    print(f"✅ Query result count: {len(vaccines)}")
+    print(f"\n Querying for vaccine='{vaccine_name.lower()}', city={user_city}, future date OK")
+    print(f" Query result count: {len(vaccines)}")
 
     if not vaccines:
         flash(f"No available slots for {vaccine_name} in your city ({user_city.title()}).", "info")
@@ -442,7 +440,7 @@ def available_vaccines():
             message=f"No available slots for {vaccine_name} in your city ({user_city.title()})."
         )
 
-    # ✅ Show results
+
     return render_template('available_vaccines.html', vaccines=vaccines)
 
 
@@ -460,7 +458,7 @@ def confirm_vaccine(slot_id):
 
     hospital = Hospitals.query.get(slot.Hospital_ID)
 
-    # ✅ Use selected date from session, fallback to slot date if missing
+
     selected_date_str = session.get('selected_date')
     if selected_date_str:
         appointment_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
@@ -471,14 +469,14 @@ def confirm_vaccine(slot_id):
         'confirm_vaccine_booking.html',
         slot=slot,
         hospital=hospital,
-        appointment_date=appointment_date  # ✅ send to template
+        appointment_date=appointment_date
     )
 
 
 @app.route('/book_vaccine_final/<int:slot_id>', methods=['POST'])
 @login_required
 def book_vaccine_final(slot_id):
-    print(f"🧠 --- DEBUG: Booking Vaccine Slot --- for Slot ID: {slot_id}")
+    print(f" --- DEBUG: Booking Vaccine Slot --- for Slot ID: {slot_id}")
 
     vaccine_slot = Vaccines.query.get(slot_id)
     user = get_logged_in_user()
@@ -487,7 +485,7 @@ def book_vaccine_final(slot_id):
         flash("Selected slot is no longer available.", "danger")
         return redirect(url_for('available_vaccines'))
 
-    # ✅ Get appointment date selected by user from session (NOT slot date)
+
     selected_date_str = session.get('selected_date')
     if selected_date_str:
         try:
@@ -498,11 +496,11 @@ def book_vaccine_final(slot_id):
         appointment_date = vaccine_slot.Slot_Date
 
     try:
-        # 🔻 Reduce available slot count
+
         vaccine_slot.Available -= 1
         db.session.add(vaccine_slot)
 
-        # ✅ Create booking record
+
         booking = Bookings(
             User_ID=user.User_ID,
             Vaccine_ID=vaccine_slot.Slot_ID,
@@ -515,21 +513,38 @@ def book_vaccine_final(slot_id):
         db.session.add(booking)
         db.session.commit()
 
-        # 💾 Save for payment page
+
         session['current_booking_id'] = booking.Booking_ID
         session['amount'] = 500  # Example cost
 
-        print(f"✅ Booking saved: ID={booking.Booking_ID}, Date={appointment_date}, Avail now={vaccine_slot.Available}")
+        print(f" Booking saved: ID={booking.Booking_ID}, Date={appointment_date}, Avail now={vaccine_slot.Available}")
 
-        # ✅ Redirect to payment page
+
         flash("Booking confirmed! Proceed to payment.", "success")
         return redirect(url_for('payment_page'))
 
     except Exception as e:
         db.session.rollback()
-        print(f"❌ DB Error: {e}")
+        print(f" DB Error: {e}")
         flash("Something went wrong while booking. Please try again.", "danger")
         return redirect(url_for('available_vaccines'))
+
+@app.route("/nearby_hospitals")
+@login_required
+def nearby_hospitals():
+    user = get_logged_in_user()
+    hospitals = Hospitals.query.filter_by(City=user.City).all()
+
+    print("\n--- DEBUG: Hospitals in", user.City, "---")
+    for h in hospitals:
+        print("→", h.Name, "|", h.Street_Address, "|", h.City, "|", h.State, "|", h.Postal_Code)
+    print("------------------------------------\n")
+
+    return render_template("nearby_hospitals.html", hospitals=hospitals, user=user)
+
+
+
+
 
 
 
@@ -896,7 +911,7 @@ def update_bookings(booking_id):
         new_status = request.form.get('status')
         booking.Status = new_status
 
-        # ✅ Update related Bed or Vaccine status
+
         if booking.Bed_ID:
             bed = Beds.query.get(booking.Bed_ID)
             if bed:
@@ -919,7 +934,7 @@ def update_bookings(booking_id):
         details = f"Status: {old_status} -> {new_status}"
         log_audit(user.User_ID, 'bookings', booking.Booking_ID, 'updated', details)
 
-        flash("✅ Booking and related record updated successfully!", "success")
+        flash("Booking and related record updated successfully!", "success")
         return redirect(url_for('staff_bookings'))
 
     # GET request
@@ -950,6 +965,9 @@ def staff_payments():
     
 
     return render_template('staff/payments.html', payments=payments, user=user)
+
+
+
 
 
 
@@ -1017,6 +1035,140 @@ def is_strong_password(password):
     return has_upper and has_lower and has_digit
 
 
+# ---------- Staff Analytics ----------
+
+
+@app.route('/staff/analytics', endpoint='staff_analytics')
+@login_required
+def staff_analytics():
+    """Render analytics dashboard page with month selector"""
+    months = (
+        db.session.query(func.date_format(Bookings.appointment_date, "%Y-%m"))
+        .distinct()
+        .all()
+    )
+    # Convert from tuples to simple string list like ['2025-10', '2025-11']
+    months = [m[0] for m in months if m[0] is not None]
+    return render_template('staff/analytics.html', months=months)
+
+@app.route("/staff/analytics/data/<month>")
+@login_required
+def staff_analytics_data(month):
+    """Return analytics data for selected month in JSON for charts."""
+    from datetime import date
+    from sqlalchemy import func, extract
+
+    user = get_logged_in_user()
+    hospital_id = user.Hospital_ID
+    year, month_num = map(int, month.split("-"))
+
+    # --- Gender distribution ---
+    gender_data = (
+        db.session.query(Users.Gender, func.count(Bookings.Booking_ID))
+        .join(Bookings, Users.User_ID == Bookings.User_ID)
+        .filter(
+            Bookings.Hospital_ID == hospital_id,
+            extract('year', Bookings.appointment_date) == year,
+            extract('month', Bookings.appointment_date) == month_num,
+            Bookings.Status.in_(["confirmed", "completed"])
+        )
+        .group_by(Users.Gender)
+        .all()
+    )
+    gender_result = [{"label": g or "Unknown", "count": c} for g, c in gender_data]
+
+    # --- Age groups ---
+    age_groups = {
+        "Infants (0-1)": 0,
+        "Children (2-12)": 0,
+        "Teenagers (13-19)": 0,
+        "Adults (20-59)": 0,
+        "Seniors (60+)": 0,
+    }
+    today = date.today()
+    user_dobs = (
+        db.session.query(Users.DOB)
+        .join(Bookings, Users.User_ID == Bookings.User_ID)
+        .filter(
+            Bookings.Hospital_ID == hospital_id,
+            extract('year', Bookings.appointment_date) == year,
+            extract('month', Bookings.appointment_date) == month_num,
+        )
+        .all()
+    )
+    for (dob,) in user_dobs:
+        if dob:
+            age = (today - dob).days // 365
+            if age <= 1:
+                age_groups["Infants (0-1)"] += 1
+            elif age <= 12:
+                age_groups["Children (2-12)"] += 1
+            elif age <= 19:
+                age_groups["Teenagers (13-19)"] += 1
+            elif age <= 59:
+                age_groups["Adults (20-59)"] += 1
+            else:
+                age_groups["Seniors (60+)"] += 1
+
+    # --- Bed type data ---
+    bed_data = (
+        db.session.query(Beds.Bed_Type, func.count(Bookings.Booking_ID))
+        .join(Bookings, Beds.Bed_ID == Bookings.Bed_ID)
+        .filter(
+            Bookings.Hospital_ID == hospital_id,
+            extract('year', Bookings.appointment_date) == year,
+            extract('month', Bookings.appointment_date) == month_num,
+            Bookings.Status.in_(["confirmed", "completed"])
+        )
+        .group_by(Beds.Bed_Type)
+        .all()
+    )
+    bed_result = [{"label": b, "count": c} for b, c in bed_data]
+
+    # --- Vaccine type data ---
+    vaccine_data = (
+        db.session.query(Vaccines.Vaccine_Name, func.count(Bookings.Booking_ID))
+        .join(Bookings, Vaccines.Slot_ID == Bookings.Vaccine_ID)
+        .filter(
+            Bookings.Hospital_ID == hospital_id,
+            extract('year', Bookings.appointment_date) == year,
+            extract('month', Bookings.appointment_date) == month_num,
+            Bookings.Status.in_(["confirmed", "completed"])
+        )
+        .group_by(Vaccines.Vaccine_Name)
+        .all()
+    )
+    vaccine_result = [{"label": v, "count": c} for v, c in vaccine_data]
+
+    result = {
+        "gender_data": gender_result,
+        "age_data": age_groups,
+        "bed_data": bed_result,
+        "vaccine_data": vaccine_result,
+    }
+
+    print("\n📊 DEBUG DATA ---")
+    print("Gender:", gender_result)
+    print("Age:", age_groups)
+    print("Beds:", bed_result)
+    print("Vaccines:", vaccine_result)
+    print("-------------------------------\n")
+
+    return jsonify(result)
+
+
+
+
+
+
+
+
+
+
+
+
 # ------------------ Run ------------------
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
+
+

@@ -27,7 +27,7 @@ class Users(db.Model, UserMixin):
     Hospital_ID = db.Column(db.Integer, db.ForeignKey('hospitals.Hospital_ID'), nullable=True)
     hospital = db.relationship("Hospitals", backref="staff")
 
-    # ✅ Add this method for Flask-Login
+   
     def get_id(self):
         return str(self.User_ID)
 
@@ -42,6 +42,7 @@ class Hospitals(db.Model):
     State = db.Column(db.String(30))
     Postal_Code = db.Column(db.String(20))
     Phone = db.Column(db.String(20))
+    Email = db.Column(db.String(100))
 
 class Beds(db.Model):
     __tablename__ = 'beds'
@@ -67,6 +68,8 @@ class Bookings(db.Model):
     __tablename__ = 'bookings'
     Booking_ID = db.Column(db.Integer, primary_key=True)
     User_ID = db.Column(db.Integer, db.ForeignKey('users.User_ID'))
+    Hospital_ID = db.Column(db.Integer, db.ForeignKey('hospitals.Hospital_ID', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
+
     Bed_ID = db.Column(db.Integer, db.ForeignKey('beds.Bed_ID'), nullable=True)
     Vaccine_ID = db.Column(db.Integer, db.ForeignKey('vaccines.Slot_ID'), nullable=True)
     Booking_Type = db.Column(db.String(10))

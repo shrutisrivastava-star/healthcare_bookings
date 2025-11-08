@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hospital Monthly Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #dbeafe;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            padding: 30px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .description {
+            color: var(--gray);
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        select {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 16px;
+            background-color: white;
+            color: var(--dark);
+            min-width: 200px;
+            transition: all 0.2s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .chart-header h3 {
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 280px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .data-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .percentage {
+            color: var(--gray);
+            font-size: 0.9em;
+            margin-left: 8px;
+        }
+        
+        .total-count {
+            background: var(--light);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .no-data {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--gray);
+            text-align: center;
+        }
+        
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary-light);
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 1100px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                padding: 15px;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                Monthly Hospital Analytics
+            </h1>
+            <p class="description">Select a month to view detailed statistics about patient demographics, bed utilization, and vaccine distribution.</p>
+        </header>
+        
+        <div class="filter-section">
+            <label for="monthSelect" style="font-weight: 500; color: var(--dark);">Select Month:</label>
+            <select id="monthSelect" onchange="loadAnalytics()">
+                <option value="">-- Select Month --</option>
+                {% for m in months %}
+                <option value="{{ m }}">{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div id="chartsSection" style="display:none;">
+            <div class="charts-grid">
+                <!-- Gender Distribution -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Gender Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                    <div id="genderDataTable"></div>
+                </div>
+                
+                <!-- Age Group Distribution -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Age Group Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                    <div id="ageDataTable"></div>
+                </div>
+                
+                <!-- Bed Type Bookings -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Bed Type Bookings</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="bedChart"></canvas>
+                    </div>
+                    <div id="bedDataTable"></div>
+                </div>
+                
+                <!-- Vaccine Type Bookings -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Vaccine Type Bookings</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="vaccineChart"></canvas>
+                    </div>
+                    <div id="vaccineDataTable"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="noDataSection" class="chart-container" style="display:none;">
+            <div class="no-data">
+                <div class="no-data-icon">📊</div>
+                <h3>No Data Available</h3>
+                <p>There is no data available for the selected month.</p>
+            </div>
+        </div>
+    </div>
+<script>
+console.log("✅ Analytics script loaded");
+
+let charts = {};
+
+async function loadAnalytics() {
+    const month = document.getElementById("monthSelect").value;
+    console.log("🔹 Month selected:", month);
+
+    if (!month) return;
+
+    const chartsSection = document.getElementById("chartsSection");
+    const noDataSection = document.getElementById("noDataSection");
+    chartsSection.style.display = "block";
+    noDataSection.style.display = "none";
+
+    const wrappers = document.querySelectorAll(".chart-wrapper");
+    if (wrappers.length === 0) {
+        console.error("❌ No .chart-wrapper elements found");
+        return;
+    }
+
+    wrappers.forEach(w => w.innerHTML = '<div class="loading"><div class="spinner"></div></div>');
+
+    try {
+        const res = await fetch(/staff/analytics/data/${month});
+        console.log("🌐 Fetching:", res.url, res.status);
+
+        if (!res.ok) throw new Error(Server error: ${res.status});
+        const data = await res.json();
+        console.log("📊 Data received:", data);
+
+        // Helper to recreate chart canvas
+        const recreate = (id) => {
+            const wrap = document.querySelector(#${id})?.parentElement;
+            if (!wrap) {
+                console.warn("⚠ Missing wrapper for", id);
+                return null;
+            }
+            wrap.innerHTML = <canvas id="${id}"></canvas>;
+            return document.getElementById(id);
+        };
+
+        Object.values(charts).forEach(c => c?.destroy());
+        charts = {};
+
+        // Color schemes
+        const colors = {
+            gender: ["#2563eb", "#ec4899", "#facc15", "#10b981"],
+            age: ["#34d399", "#60a5fa", "#fbbf24", "#f87171", "#a78bfa"],
+            bed: ["#6366f1", "#10b981", "#f59e0b", "#ef4444"],
+            vaccine: ["#06b6d4", "#8b5cf6", "#f43f5e", "#84cc16"]
+        };
+
+        // Draw helper
+        function drawChart(ctxId, labels, values, palette) {
+            const ctx = recreate(ctxId);
+            if (!ctx) return;
+            charts[ctxId] = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels,
+                    datasets: [{ data: values, backgroundColor: palette }]
+                },
+                options: { plugins: { legend: { position: "bottom" } } }
+            });
+        }
+
+        // GENDER
+        if (data.gender_data?.length) {
+            drawChart("genderChart",
+                data.gender_data.map(d => d.label),
+                data.gender_data.map(d => d.count),
+                colors.gender);
+        } else {
+            document.querySelector("#genderChart").parentElement.innerHTML =
+                "<p style='text-align:center;color:gray;'>No gender data</p>";
+        }
+
+        // AGE
+        if (Object.keys(data.age_data || {}).length) {
+            drawChart("ageChart",
+                Object.keys(data.age_data),
+                Object.values(data.age_data),
+                colors.age);
+        } else {
+            document.querySelector("#ageChart").parentElement.innerHTML =
+                "<p style='text-align:center;color:gray;'>No age data</p>";
+        }
+
+        // BED
+        if (data.bed_data?.length) {
+            drawChart("bedChart",
+                data.bed_data.map(d => d.label),
+                data.bed_data.map(d => d.count),
+                colors.bed);
+        } else {
+            document.querySelector("#bedChart").parentElement.innerHTML =
+                "<p style='text-align:center;color:gray;'>No bed data</p>";
+        }
+
+        // VACCINE
+        if (data.vaccine_data?.length) {
+            drawChart("vaccineChart",
+                data.vaccine_data.map(d => d.label),
+                data.vaccine_data.map(d => d.count),
+                colors.vaccine);
+        } else {
+            document.querySelector("#vaccineChart").parentElement.innerHTML =
+                "<p style='text-align:center;color:gray;'>No vaccine data</p>";
+        }
+
+        console.log("✅ Charts rendered successfully");
+
+    } catch (err) {
+        console.error("❌ Error loading analytics:", err);
+        document.getElementById("chartsSection").style.display = "none";
+        document.getElementById("noDataSection").style.display = "block";
+        document.getElementById("noDataSection").querySelector("p").textContent =
+            "Error loading data. Please try again.";
+    }
+}
+</script>
+
+
+
+</body>
+</html>
